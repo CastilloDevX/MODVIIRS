@@ -2,6 +2,10 @@
 
 Monorepo con dos aplicaciones independientes: una API Flask y un frontend React con TypeScript y Vite.
 
+MODVIIRS explora un calendario de actividad de quema mediante armonización de detecciones MODIS y VIIRS. Actualmente existe solo la base técnica; las funcionalidades científicas están pendientes de decisiones y validación con fuentes NASA. Ver el [contexto completo y PDF original](docs/README.md).
+
+La versión global está en [VERSION](VERSION), con historial en [CHANGELOG.md](CHANGELOG.md): X para versiones mayores/pesadas, Y para características y Z para bugs/arreglos. Antes de implementar features se consultan las decisiones con el usuario. Al concluir una feature o pedir push se consulta si se desea commit, con formato `type: :gitmoji: description` y descripción siempre en inglés. Ver la [política completa](docs/CONTRIBUTING.md) y las [instrucciones para IA](AGENTS.md).
+
 ```text
 backend/
   src/modviirs/
@@ -15,7 +19,11 @@ frontend/
     lib/api.ts        # Acceso HTTP y validación de la respuesta
     App.tsx           # Composición de la pantalla
   package-lock.json
-docs/architecture.md # Decisiones y guía para crecer
+docs/                # Contexto íntegro, fuentes NASA, arquitectura y colaboración
+.agents/             # Contexto e instrucciones compartidas para IA
+AGENTS.md            # Punto de entrada para agentes
+VERSION              # Versión canónica X.Y.Z
+CHANGELOG.md         # Historial de versiones y cambios pendientes
 .github/workflows/    # Verificaciones automáticas
 ```
 

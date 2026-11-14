@@ -1,0 +1,169 @@
+                            Harmonization of MODIS and VIIRS Hot Spots
+
+
+                                         Informe contextual y análisis técnico
+                           NASA Space Apps Challenge 2026 | 14 de noviembre de 2026
+
+
+                                                      ABSTRACT
+
+                El reto propone una aplicación web que convierta registros de focos activos de MODIS y
+         VIIRS en un calendario comparable de actividad de quema para un área de interés. Este docu-
+         mento reúne el contexto investigado, los recursos FIRMS y una interpretación técnica para orien-
+         tar el proyecto. La perspectiva de evaluación es analítica; no representa una evaluación oficial de
+         NASA.
+
+
+1. Contexto y objetivo oficial
+      Comprender cuándo y dónde ocurre actividad de quema ayuda a anticipar temporadas críticas, organizar la
+vigilancia y orientar la respuesta. El reto incluye incendios forestales y quemas agrícolas suficientemente intensas
+para ser detectadas desde el espacio. El registro satelital supera dos décadas, pero está dividido entre sensores que no
+producen observaciones directamente equivalentes.
+      La consigna pide construir una aplicación web que armonice esos registros en un calendario de actividad de
+quema basado en focos activos. Debe permitir seleccionar un área de interés y examinar patrones históricos, condi-
+ciones inusuales y periodos críticos. Sus destinatarios incluyen personal de alerta temprana y emergencias, científi-
+cos y gestores de tierras. Se clasifica en ciencias de la Tierra y software, con dificultad intermedia y avanzada. [1]
+      La descripción oficial pudo consultarse mediante el índice de búsqueda; la apertura directa devolvió un error
+502. La página principal de Earthdata FIRMS devolvió un error 403. Se complementó la investigación con docu-
+mentación operativa oficial de FIRMS y guías de NASA accesibles. Por ello, este informe no afirma haber verificado
+exhaustivamente todas las pestañas o recursos adicionales de la página del reto.
+
+2. Qué exige y qué queda a criterio del equipo
+• Aplicación web y selección de un área de interés.
+• Uso conjunto y armonización de los registros MODIS y VIIRS.
+• Calendario de actividad de quema que permita explorar historia, anomalías y periodos críticos.
+      El enunciado disponible no prescribe un algoritmo, arquitectura, lenguaje, modelo de inteligencia artificial o
+formato exacto del calendario. Tampoco establece que sea obligatorio predecir la propagación, clasificar las causas
+del fuego o enviar alertas automáticas. Estas funciones serían ampliaciones y requieren evidencia propia.
+
+3. Por qué es necesaria la armonización
+       MODIS detecta focos a resolución nominal de aproximadamente 1 km; VIIRS ofrece el producto de 375 m.
+La mayor sensibilidad espacial de VIIRS permite detectar más fuegos pequeños. Los horarios de paso, el ángulo de
+observación, la frecuencia de cobertura y los algoritmos también influyen en lo observado. Un aumento de puntos
+tras incorporar un sensor puede reflejar un cambio del sistema de observación. [2,5,6]
+      Unir columnas y concatenar archivos resuelve interoperabilidad de formato, pero la comparabilidad científica
+requiere definir una medida común y evaluar el sesgo entre sensores. Tampoco existe una conversión universal
+basada únicamente en la relación entre áreas de píxel.
+      Una detección no equivale a un incendio independiente: un mismo evento puede producir numerosos píxeles y
+aparecer en varios pasos o satélites. El producto tampoco proporciona por sí solo el área quemada, la severidad o un
+                                                        -2-
+
+
+perímetro preciso.
+
+4. FIRMS: función y servicios disponibles
+      Fire Information for Resource Management System distribuye detecciones de fuego activo y anomalías térmi-
+cas, además de imágenes y servicios geoespaciales. Es la fuente central propuesta para obtener los registros del
+proyecto. Las capas pueden incluir anomalías de volcanes y fuentes industriales, además de quema de vegetación.
+[2,5]
+• Datos recientes: descargas de las últimas 24 horas, 48 horas y siete días, en formatos como CSV, KML y shape-
+  file; servicios WMS y WMS-T para visualización. [2]
+• Archivo histórico: solicitudes de datos anteriores a siete días en CSV, JSON o shapefile, con autenticación medi-
+  ante Earthdata o correo. El procesamiento de solicitudes puede ser asíncrono. [3]
+• API Area: consulta por cuadro geográfico o mundo, fuente y fecha. Requiere MAP_KEY gratuita; admite de uno
+  a cinco días por petición. Documenta un límite de 5.000 transacciones por intervalo de diez minutos; peticiones
+  grandes pueden consumir varias. [4]
+       Ruta de consulta: /api/area/csv/[MAP_KEY]/[SOURCE]/[west,south,east,north]/[DAY_RANGE]/[DATE]. La
+fecha es opcional. Entre las fuentes figuran MODIS_SP y MODIS_NRT, además de las variantes SP y NRT de VI-
+IRS para S-NPP, NOAA-20 y NOAA-21. Debe comprobarse disponibilidad antes de programar una descarga histór-
+ica. [4]
+
+5. Cobertura temporal y calidad
+       FIRMS documenta MODIS Terra desde noviembre de 2000 y Aqua desde julio de 2002. El archivo incluye
+VIIRS S-NPP desde el 20 de enero de 2012 hasta el 2 de noviembre de 2026. NOAA-20 y NOAA-21 permiten am-
+pliar la continuidad de VIIRS. [2,3]
+      Las páginas consultadas difieren en algunas fechas iniciales de NOAA-20 y NOAA-21: el archivo, las descrip-
+ciones y los productos recientes no muestran siempre el mismo inicio. Debe verificarse la cobertura del producto
+concreto y no confundir inicio de misión, disponibilidad NRT e inicio del archivo estándar. [2,3,5]
+       NASA recomienda productos estándar de calidad científica para estudios históricos cuando la latencia no sea
+prioritaria. Los datos NRT pueden presentar interrupciones y se sustituyen en el archivo por procesamiento estándar
+después de varios meses. El calendario histórico debería señalar qué periodos son provisionales y conservar la ver-
+sión del producto. [2,3,6]
+
+6. Atributos y precauciones de interpretación
+      Los datos incluyen ubicación, fecha y hora de adquisición, satélite, confianza, versión, tamaño de píxel, tem-
+peraturas de brillo y potencia radiativa del fuego (FRP), según el producto. La hora de adquisición se expresa en
+UTC. Debe decidirse y documentarse si el calendario usa UTC o una definición local del día. [5]
+      Las categorías de confianza VIIRS son baja, nominal y alta; no deben interpretarse automáticamente como
+probabilidades calibradas ni igualarse sin justificación a los valores MODIS. Las temperaturas de brillo correspon-
+den a canales espectrales distintos y no son la temperatura física exacta del incendio.
+      FRP mide potencia radiativa integrada del píxel en megavatios. La resolución, saturación, geometría y hora de
+observación afectan su estimación. Sumar FRP de diferentes pasos puede contar repetidamente el mismo fuego y no
+produce directamente energía total emitida. [5,7]
+      Nubes, humo denso, fuegos pequeños o breves y pasos satelitales pueden impedir detecciones. Cero puntos no
+demuestra ausencia de fuego. Un CSV de detecciones por sí solo no permite distinguir con certeza un día sin fuego
+de un día sin observación válida; para ello se necesitan máscaras de fuego, cobertura u otros datos de observación.
+[6,8]
+
+7. Propuesta técnica de implementación
+      Las siguientes son recomendaciones de diseño, no requisitos adicionales publicados por NASA.
+1. Definir una región piloto, escala espacial y medida objetivo: días con actividad, celdas activas o un índice com-
+   parable. Conservar también los conteos originales por sensor.
+                                                            -3-
+
+
+2. Ingerir datos históricos estándar; validar coordenadas, fechas, versiones y duplicados exactos. Mantener separa-
+   dos los estados provisional y definitivo.
+3. Agregar en una grilla común y ventanas temporales explícitas. Una grilla común facilita comparaciones, aunque
+   no elimina diferencias de sensibilidad ni recupera fuegos omitidos.
+4. Aprovechar años de solapamiento para estimar relaciones entre sensores por región, temporada y día/noche.
+   Considerar correspondencias espaciales y temporales sin forzar que todas las detecciones tengan pareja.
+5. Validar la corrección en años o regiones excluidos del ajuste. Comparar con una referencia sencilla y mostrar er-
+   ror, sesgo e incertidumbre. La reducción de diferencias entre sensores no prueba por sí sola exactitud física.
+6. Construir una referencia estacional y comparar la actividad con la distribución histórica de la misma época.
+   Mostrar percentiles y periodos críticos, indicando la cantidad de años disponibles.
+7. Presentar mapa, calendario, serie histórica y explicación del método. Permitir inspeccionar fuente, filtros, peri-
+   odo y calidad detrás de cada resultado.
+
+8. Cómo interpretar anomalías y alerta temprana
+      Una anomalía describe una desviación respecto de una referencia histórica definida. Por ejemplo, actividad se-
+manal por encima del percentil 90 de semanas equivalentes puede marcar una condición inusual, si hay suficientes
+observaciones comparables. El umbral es una elección metodológica que debe justificarse.
+      El calendario puede apoyar preparación estacional y priorización del monitoreo. Un pronóstico operativo de
+incendios o propagación necesita variables y validación adicionales, como meteorología, combustibles y topografía.
+La estacionalidad histórica no constituye por sí sola una probabilidad de incendio futuro ni una orden de evacuación.
+
+9. Perspectiva de juez técnico
+      Los criterios siguientes son una propuesta de revisión y no una rúbrica oficial de Space Apps.
+• Pertinencia: la demostración responde a la selección de área, el calendario, las anomalías y los periodos críticos.
+• Solidez científica: explica el efecto del sensor, la unidad de actividad y los límites de comparabilidad.
+• Evidencia: presenta comparación antes y después, validación independiente del ajuste y casos donde el método
+  falla.
+• Trazabilidad: identifica productos, versiones, filtros, fuentes y parámetros; permite reproducir resultados.
+• Utilidad: ofrece una lectura comprensible para usuarios y distingue datos faltantes, ceros y actividad provisional.
+      Una demostración convincente puede concentrarse en una región y un periodo bien sustentados. Conviene pre-
+sentar el problema de cambio de sensor, el efecto de la armonización en datos reales y una decisión concreta que el
+calendario facilite. La interfaz y cualquier componente de IA deben sostener esa evidencia.
+
+10. Alcance mínimo sugerido
+       Un prototipo revisable incluiría una región piloto, varios años de solapamiento MODIS-VIIRS, datos reales
+identificados, una medida de actividad definida, comparación por sensor, corrección validada y calendario con refer-
+encia estacional. Debería incorporar procedencia, limitaciones, fecha de actualización y exportación del resultado.
+La cobertura global puede ampliarse después de comprobar el método regional.
+
+11. Fuentes oficiales consultadas
+       [1] NASA Space Apps Challenge. Descripción del reto.
+https://www.spaceappschallenge.org/2026/challenges/modis-and-viirs-hot-spots/
+       [2] NASA FIRMS. Active Fire Data.
+https://firms.modaps.eosdis.nasa.gov/content/active_fire/
+       [3] NASA FIRMS. Archive Download.
+https://firms.modaps.eosdis.nasa.gov/download/
+       [4] NASA FIRMS. API Area: fuentes, parámetros y límites.
+https://firms.modaps.eosdis.nasa.gov/api/area/
+                                                        -4-
+
+
+       [5] NASA FIRMS. Descripción y atributos VIIRS.
+https://firms.modaps.eosdis.nasa.gov/content/descriptions/FIRMS_VIIRS_Firehotspots.html
+       [6] NASA. VIIRS Collection 2 Active Fire 375 m User Guide.
+https://earthdata.nasa.gov/s3fs-public/2024-07/VIIRS_C2_AF-375m_User_Guide_1.0.pdf
+       [7] NASA ARSET. FIRMS 2025: preguntas y respuestas, parte 2.
+https://appliedsciences.nasa.gov/sites/default/files/2025-04/FIRMS_Part2_QA.pdf
+       [8] NASA ARSET. FIRMS 2025: preguntas y respuestas, parte 3.
+https://appliedsciences.nasa.gov/sites/default/files/2025-05/Part%203%20FIRMS%202025%20Q%26A%20Session.docx.pdf
+       Recurso principal indicado por el usuario:
+https://www.earthdata.nasa.gov/data/tools/firms
+       Atribución: se reconoce el uso de datos y documentación de NASA FIRMS, parte de Earth Science Data and
+Information Systems (ESDIS). En la aplicación final deben añadirse las citas específicas de los productos realmente
+utilizados. Fecha de investigación: 14 de noviembre de 2026.
+

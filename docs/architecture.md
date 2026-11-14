@@ -19,3 +19,12 @@ Flask sigue el patrón [application factory](https://flask.palletsprojects.com/e
 Esta base ofrece comunicación real entre aplicaciones, comprobación de disponibilidad del proceso, errores JSON, configuración externa y CI. No incorpora base de datos, autenticación ni infraestructura de despliegue, porque todavía no hay requisitos que permitan diseñarlos con criterio.
 
 El frontend valida la respuesta de bienvenida en tiempo de ejecución y cancela las peticiones al desmontarse. Las llamadas tienen un límite de diez segundos y se pueden reintentar. El mismo origen evita necesitar CORS durante el desarrollo y en el despliegue recomendado.
+
+
+## Contexto científico y decisiones futuras
+
+La base técnica no implementa aún ingesta FIRMS, mapas, calendario ni armonización. El [contexto aportado](contexto/proyecto.md) y su PDF completo orientan la investigación; sus propuestas no son requisitos aprobados. Consultar [fuentes NASA](fuentes/nasa.md) y resolver las [decisiones pendientes](decisiones/README.md) con el usuario antes de implementar cada feature.
+
+El historial global usa el archivo raíz [VERSION](../VERSION), con formato `X.Y.Z` y cambios registrados en [CHANGELOG.md](../CHANGELOG.md). X identifica versiones mayores/pesadas, Y nuevas características y Z bugs/arreglos. Este versionado es independiente de `/api/v1`.
+
+La política de decisiones, confirmación de commit/push y mensajes `tipo: :gitmoji: descripción` está en [CONTRIBUTING.md](CONTRIBUTING.md); también se aplica a agentes mediante [AGENTS.md](../AGENTS.md) y [.agents/AGENTS.md](../.agents/AGENTS.md).
