@@ -29,11 +29,12 @@ CHANGELOG.md         # Historial de versiones y cambios pendientes
 
 ## Desarrollo local
 
-Requisitos: Python 3.12 o superior, Node.js 24 LTS y npm. Ejecutar los comandos desde la raíz salvo donde se indique. No es necesario configurar variables para empezar.
+Requisitos: Python 3.12 o superior, Node.js 24 LTS y npm. Ejecutar los comandos desde la raíz salvo donde se indique. Health y el catálogo de fuentes no requieren configuración; hotspots y summary necesitan una MAP_KEY de NASA FIRMS configurada únicamente en el entorno del backend.
 
 Primera terminal, backend:
 
 ```bash
+export MODVIIRS_FIRMS_MAP_KEY='<MAP_KEY de NASA FIRMS>'
 python3 -m venv backend/.venv
 backend/.venv/bin/python -m pip install -r backend/requirements-dev.lock
 backend/.venv/bin/python -m pip install --no-deps -e backend
@@ -56,12 +57,19 @@ Abrir http://localhost:5173. Vite reenvía `/api` hacia `http://127.0.0.1:5000`,
 | --- | --- | --- |
 | GET | `/api/v1/hello` | `{"message":"Hello World"}` |
 | GET | `/api/v1/health` | `{"status":"ok"}` |
+| GET | `/api/v1/firms/sources` | Catálogo local de 8 productos MODIS/VIIRS; no declara rangos de disponibilidad. |
+| GET | `/api/v1/firms/hotspots` | Colección GeoJSON para fuente, bbox y fechas requeridas. |
+| GET | `/api/v1/firms/summary` | Conteo de detecciones y conteos por fecha UTC para los mismos filtros. |
 
 ```bash
 curl http://127.0.0.1:5000/api/v1/hello
+curl http://127.0.0.1:5000/api/v1/firms/sources
+curl 'http://127.0.0.1:5000/api/v1/firms/hotspots?source=VIIRS_SNPP_SP&bbox=-90.5,20.5,-89.0,21.5&start_date=2026-10-10&end_date=2026-10-17'
 ```
 
-Los errores HTTP usan JSON con `error` y `message`. Health confirma que el proceso responde; no comprueba servicios externos.
+Hotspots y summary consultan NASA FIRMS en el backend; requieren `MODVIIRS_FIRMS_MAP_KEY` en el entorno del proceso Flask. El catálogo funciona sin clave. No se selecciona automáticamente SP o NRT y el catálogo no garantiza disponibilidad del producto para una fecha. Cada solicitud acepta hasta 31 días inclusivos y se divide en bloques de hasta cinco días; una colección válida sin registros devuelve cero features. Las propiedades conservan los atributos CSV disponibles y metadata cuenta filas inválidas excluidas. El resumen cuenta detecciones reportadas, no incendios individuales.
+
+Los errores HTTP usan JSON con `error` y `message`: filtros inválidos devuelven 400, configuración ausente o cuota excedida 503, error/respuesta inválida del proveedor 502 y timeout 504. Health confirma que el proceso responde; no comprueba servicios externos.
 
 ## Verificación
 

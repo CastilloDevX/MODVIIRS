@@ -20,6 +20,12 @@ Esta base ofrece comunicación real entre aplicaciones, comprobación de disponi
 
 El frontend valida la respuesta de bienvenida en tiempo de ejecución y cancela las peticiones al desmontarse. Las llamadas tienen un límite de diez segundos y se pueden reintentar. El mismo origen evita necesitar CORS durante el desarrollo y en el despliegue recomendado.
 
+### Consulta de FIRMS desde Flask
+
+El backend ofrece `GET /api/v1/firms/sources`, `/hotspots` y `/summary`. Los dos últimos consultan FIRMS en el servidor con la clave `MODVIIRS_FIRMS_MAP_KEY`; no guardan respuestas. Aceptan una fuente explícita, bbox WGS84 y fechas UTC inclusivas de hasta 31 días, divididas en solicitudes de hasta cinco días. No cambian automáticamente entre SP y NRT. La respuesta de hotspots conserva atributos CSV disponibles en propiedades GeoJSON y reporta registros descartados en metadata; el resumen cuenta detecciones reportadas por día, no incendios individuales.
+
+La documentación del proveedor confirma el límite de cinco días por consulta, pero no la disponibilidad de cada producto para cualquier fecha. El catálogo local no afirma rangos de cobertura. No hay reintentos automáticos ni caché: cada intervalo necesita uno o más bloques; FIRMS puede contabilizar cada bloque como varias transacciones. Los límites de cuota del proveedor se devuelven como servicio no disponible.
+
 
 ## Contexto científico y decisiones futuras
 

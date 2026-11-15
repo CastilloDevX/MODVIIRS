@@ -4,6 +4,11 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ## Sin publicar
 
+### Backend
+
+- Añadidos endpoints Flask FIRMS para catálogo de fuentes, hotspots GeoJSON y resumen por fecha, con clave servidor, validación de filtros, división de periodos y errores externos sanitizados.
+- Añadidas pruebas simuladas para CSV MODIS/VIIRS, paginación temporal, validación, errores de proveedor y protección de credenciales.
+
 ### Frontend
 
 - Selección de región (campo «Region» sobre «Imagery»): el botón Select oscurece el planeta; un clic/toque fija la primera esquina y otro la opuesta. Entre ambos, el rectángulo se ilumina y sigue al cursor; el resto queda oscuro. Mover el mapa con arrastre no cuenta como clic. Esc o Cancel cancelan; × borra la región. Guarda el cuadro como norte/sur/este/oeste (no cruza el antimeridiano); aún no muestra focos.
