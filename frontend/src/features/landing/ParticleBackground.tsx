@@ -1,16 +1,7 @@
 import { Pause, Play } from 'lucide-react'
-import { useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
 import Particles, { type ParticlesProps } from '@/components/Particles'
-
-const motionQuery = '(prefers-reduced-motion: reduce)'
-const prefersReducedMotion = () => window.matchMedia(motionQuery).matches
-const serverMotionPreference = () => true
-
-function subscribeToMotionPreference(onChange: () => void) {
-  const media = window.matchMedia(motionQuery)
-  media.addEventListener('change', onChange)
-  return () => media.removeEventListener('change', onChange)
-}
+import { useReducedMotion } from './useReducedMotion'
 
 const particleSettings: ParticlesProps = {
   particleColors: ['#ffffff', '#ffffff', '#ffffff'],
@@ -42,9 +33,7 @@ const particleSettings: ParticlesProps = {
 
 export function ParticleBackground() {
   const [paused, setPaused] = useState(false)
-  const reducedMotion = useSyncExternalStore(
-    subscribeToMotionPreference, prefersReducedMotion, serverMotionPreference,
-  )
+  const reducedMotion = useReducedMotion()
 
   return (
     <>
@@ -55,11 +44,11 @@ export function ParticleBackground() {
         <button
           type="button"
           className="landing-motion-toggle"
-          aria-label={paused ? 'Reanudar animación de partículas' : 'Pausar animación de partículas'}
+          aria-label={paused ? 'Resume particle animation' : 'Pause particle animation'}
           onClick={() => setPaused(value => !value)}
         >
           {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
-          {paused ? 'Reanudar animación' : 'Pausar animación'}
+          {paused ? 'Resume animation' : 'Pause animation'}
         </button>
       )}
     </>
