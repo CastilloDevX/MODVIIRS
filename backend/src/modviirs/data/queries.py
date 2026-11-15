@@ -369,3 +369,58 @@ def nrt_request_plan(bbox, start, end, sources=None, max_days=API_MAX_DAYS):
             )
         cur += dt.timedelta(days=span)
     return plan
+
+
+# --- puntos individuales (hotspots_harmonized) ---
+
+POINTS_DEFAULT_LIMIT = 50_000
+
+
+def aoi_points(
+    bbox_latlon,
+    start,
+    end,
+    sensor_group=None,
+    satellite=None,
+    frp_comparable=None,
+    exclude_persistent=False,
+    limit=POINTS_DEFAULT_LIMIT,
+):
+    """Detecciones individuales de hotspots_harmonized.parquet para un AOI + rango de fechas.
+    Devuelve (DataFrame, truncated: bool). Usa el truco limit+1 para detectar truncado sin
+    doble scan.
+    """
+    cyl, cyh, cxl, cxh = aoi_cell_range(*bbox_latlon)
+    lf = pl.scan_parquet(_DATA_DIR / "hotspots_harmonized.parquet").filter(
+        pl.col("cy").is_between(cyl, cyh)
+        & pl.col("cx").is_between(cxl, cxh)
+        & pl.col("acq_date_d").is_between(start, end)
+    )
+    if sensor_group:
+        lf = lf.filter(pl.col("sensor_group") == sensor_group)
+    if satellite:
+        lf = lf.filter(pl.col("satellite") == satellite)
+    if frp_comparable is not None:
+        lf = lf.filter(pl.col("frp_comparable") == frp_comparable)
+    if exclude_persistent:
+        lf = lf.filter(~pl.col("is_persistent"))
+    df = _collect(lf.limit(limit + 1))
+    truncated = df.height > limit
+    return df.head(limit) if truncated else df, truncated
+
+
+def aoi_points_all(
+    bbox_latlon,
+    start,
+    end,
+    sensor_group=None,
+    satellite=None,
+    frp_comparable=None,
+    exclude_persistent=False,
+):
+    """Igual que aoi_points pero sin límite de filas — para exportación CSV."""
+    df, _ = aoi_points(
+        bbox_latlon, start, end, sensor_group, satellite,
+        frp_comparable, exclude_persistent, limit=10_000_000,
+    )
+    return df
