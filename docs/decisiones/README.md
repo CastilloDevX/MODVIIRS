@@ -1,5 +1,9 @@
 # Decisiones del proyecto
 
+## Registros
+
+- [0001 — Presentación del proyecto en /landing](0001-landing.md): estructura y fondo Particles aprobados por el usuario.
+
 ## Confirmadas por el usuario
 
 - Monorepo sostenible con dos aplicaciones: backend Flask (corrige la preferencia inicial por FastAPI) y frontend React.

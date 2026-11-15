@@ -1,0 +1,63 @@
+{
+  "captured_utc": "2026-11-15T15:01:11.545Z",
+  "local_commit": "b708e1543429df8a47be71ff9eeed23bfbc840c2",
+  "reviewed_remote_commit": "eb3be2b7829eb80ea546f67152ee9aced010037f",
+  "map_source_blob": "680e624abd33410a55c78d778f2d0afd777b1d22",
+  "viewport": {
+    "width": 1440,
+    "height": 960
+  },
+  "method": "Capturas nativas de Chromium vía CDP; controles reales de la aplicación; sin datos simulados ni edición de las imágenes.",
+  "state": {
+    "dates": [
+      "01/APR/24",
+      "07/APR/24"
+    ],
+    "step": "1",
+    "date": "04/Apr/2024",
+    "region": "22.64° N · 17.87° N\n93.39° W · 87.44° W\n×",
+    "calendar_view": [
+      "3",
+      "2024"
+    ],
+    "attribution": "Imagery: NASA GIBS / ESDIS"
+  },
+  "map": {
+    "file": "frontend/public/images/features/mapa-interactivo.jpg",
+    "width": 1440,
+    "height": 960
+  },
+  "timeline": {
+    "file": "frontend/public/images/features/linea-de-tiempo.jpg",
+    "clip": {
+      "x": 280,
+      "y": 690,
+      "width": 1160,
+      "height": 270
+    }
+  },
+  "api_responses": [
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-01&end=2024-04-01",
+      "status": 200,
+      "count": 978,
+      "truncated": false
+    },
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-03&end=2024-04-03",
+      "status": 200,
+      "count": 475,
+      "truncated": false
+    },
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-04&end=2024-04-04",
+      "status": 200,
+      "count": 573,
+      "truncated": false
+    }
+  ],
+  "deferred_by_user": [
+    "Análisis de picos de la timeline",
+    "Módulo de análisis con gráficas"
+  ]
+}

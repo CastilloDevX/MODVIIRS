@@ -1,0 +1,72 @@
+{
+  "started_utc": "2026-11-15T11:46:48.808333+00:00",
+  "source": "/home/joseph/Documentos/MODVIIRS/backend/data/hotspots_harmonized.parquet",
+  "source_bytes": 2864150576,
+  "source_mtime_ns": 1794704918733843400,
+  "source_rows": 185744988,
+  "climate_source": "/home/joseph/Documentos/MODVIIRS/backend/data/prediccion/power_daily.parquet",
+  "region": {
+    "west": -92.5,
+    "south": 17.8,
+    "east": -86.7,
+    "north": 21.7
+  },
+  "mode": "clima",
+  "horizon_weeks": 1,
+  "type_filter": false,
+  "params": {
+    "max_iter": 200,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 15,
+    "l2_regularization": 1.0,
+    "random_state": 0
+  },
+  "versions": {
+    "pandas": "3.1.1",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.1",
+    "scikit-learn": "1.9.1"
+  },
+  "stages": [
+    {
+      "script": "p00_extraer_peninsula.py",
+      "seconds": 1.79
+    },
+    {
+      "script": "p01_actividad_semanal.py",
+      "seconds": 0.62
+    },
+    {
+      "script": "p02_modelo.py",
+      "seconds": 31.62
+    }
+  ],
+  "summary_2015_2025": {
+    "auc": 0.8538183546337837,
+    "auc_base": 0.587850824304934,
+    "ap": 0.2849493751735769,
+    "ap_base": 0.07487097925455409,
+    "brier": 0.045288516331259306,
+    "brier_base": 0.06863731649978563
+  },
+  "extracted_detections": 1271634,
+  "zone_history_comparison": {
+    "zones": 65,
+    "rows_new": 29499,
+    "rows_saved": 29499,
+    "only_new": 0,
+    "only_saved": 0,
+    "different_values": 0
+  },
+  "stored_summary": {
+    "auc": 0.853,
+    "auc_base": 0.5879,
+    "ap": 0.2779,
+    "ap_base": 0.0749,
+    "brier": 0.0455,
+    "brier_base": 0.0686
+  },
+  "source_sha256": "4c3b206d269dea156b5c7ee5b5d081a2ab89554e211f2d0b6f3726cc9bbfb650",
+  "status": "completed",
+  "finished_utc": "2026-11-15T11:47:29.012618+00:00"
+}

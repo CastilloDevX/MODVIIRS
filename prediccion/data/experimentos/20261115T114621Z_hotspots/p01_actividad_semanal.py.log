@@ -1,0 +1,31 @@
+detecciones: 1,271,634 -> type0 y sin persistentes, 1 plataforma/era: 643,438
+/home/joseph/Documentos/MODVIIRS/prediccion/src/p01_actividad_semanal.py:34: Pandas4Warning: Series.dt.weekday is deprecated and will be removed in a future version. Use Series.dt.day_of_week instead.
+  d["semana"] = d.fecha - pd.to_timedelta(d.fecha.dt.weekday, unit="D")
+celdas activas: 1,229 | zonas: 65 | semanas no validas: 0
+dias-con-fuego (celda) por anio y era:
+ era   MODIS_Aqua    VIIRS
+anio                     
+2002       172.0      NaN
+2003      7296.0      NaN
+2004      3533.0      NaN
+2005      6196.0      NaN
+2006      4633.0      NaN
+2007      4236.0      NaN
+2008      4744.0      NaN
+2009      6129.0      NaN
+2010      3271.0      NaN
+2011      5898.0      NaN
+2012        33.0  11726.0
+2013         NaN  19562.0
+2014         NaN  11153.0
+2015         NaN  18990.0
+2016         NaN  14342.0
+2017         NaN  17737.0
+2018         NaN  13336.0
+2019         NaN  21143.0
+2020         NaN  17651.0
+2021         NaN  12067.0
+2022         NaN  12885.0
+2023         NaN  19574.0
+2024         NaN  19671.0
+2025         NaN  15259.0
