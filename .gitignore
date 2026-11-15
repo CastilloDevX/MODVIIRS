@@ -14,7 +14,6 @@ coverage/
 .DS_Store
 
 # Data files (large, regenerated from pipeline)
-backend/data/activity_grid.parquet
 backend/data/hotspots_harmonized.parquet
 backend/data/*.nc
 backend/data/*.hdf
