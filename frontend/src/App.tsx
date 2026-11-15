@@ -6,7 +6,7 @@ const LandingPage = lazy(() => import('./features/landing/LandingPage').then(mod
 
 export default function App() {
   return (
-    <Suspense fallback={<p role="status" style={{ padding: 24 }}>Cargando…</p>}>
+    <Suspense fallback={<p role="status" style={{ padding: 24 }}>Loading…</p>}>
       <Routes>
         <Route path="/" element={<MapPage />} />
         <Route path="/landing" element={<LandingPage />} />

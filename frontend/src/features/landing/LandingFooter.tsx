@@ -3,7 +3,7 @@ export function LandingFooter() {
     <footer className="landing-footer">
       <div className="landing-footer-inner">
         <div className="landing-footer-brands">
-          <a href="#top" className="landing-footer-project" aria-label="MODVIIRS, back to the top">
+          <a href="#inicio" className="landing-footer-project" aria-label="MODVIIRS, back to top">
             <img src="/icon.png" alt="" width="40" height="40" loading="lazy" decoding="async" />
             <span>MODVIIRS</span>
           </a>

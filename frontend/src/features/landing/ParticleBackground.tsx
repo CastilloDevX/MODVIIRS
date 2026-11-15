@@ -1,16 +1,7 @@
 import { Pause, Play } from 'lucide-react'
-import { useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
 import Particles, { type ParticlesProps } from '@/components/Particles'
-
-const motionQuery = '(prefers-reduced-motion: reduce)'
-const prefersReducedMotion = () => window.matchMedia(motionQuery).matches
-const serverMotionPreference = () => true
-
-function subscribeToMotionPreference(onChange: () => void) {
-  const media = window.matchMedia(motionQuery)
-  media.addEventListener('change', onChange)
-  return () => media.removeEventListener('change', onChange)
-}
+import { useReducedMotion } from './useReducedMotion'
 
 const particleSettings: ParticlesProps = {
   particleColors: ['#ffffff', '#ffffff', '#ffffff'],
@@ -42,9 +33,7 @@ const particleSettings: ParticlesProps = {
 
 export function ParticleBackground() {
   const [paused, setPaused] = useState(false)
-  const reducedMotion = useSyncExternalStore(
-    subscribeToMotionPreference, prefersReducedMotion, serverMotionPreference,
-  )
+  const reducedMotion = useReducedMotion()
 
   return (
     <>

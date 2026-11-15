@@ -1,63 +1,335 @@
 {
-  "captured_utc": "2026-11-15T15:01:11.545Z",
-  "local_commit": "b708e1543429df8a47be71ff9eeed23bfbc840c2",
-  "reviewed_remote_commit": "eb3be2b7829eb80ea546f67152ee9aced010037f",
-  "map_source_blob": "680e624abd33410a55c78d778f2d0afd777b1d22",
+  "captured_utc": "2026-11-15T15:32:19.862Z",
+  "local_commit": "49f608b873353f2ddfa6adbc3e1e4aa78fc3183b",
+  "source_blobs": {
+    "frontend/src/features/map/MapPage.tsx": "904d7f9fd3fe7ce687e453f5a32dd347b60ceb10",
+    "frontend/src/features/map/MapView.tsx": "979f7a23b68560b674acc990f9b0a1082f18ea0f",
+    "frontend/src/features/map/Timeline.tsx": "7ef248f5422fea829676b3f0e4ea154bf2c5e764",
+    "frontend/src/features/map/AnalysisPanel.tsx": "4fe3a922b53f40830d05ceda1e329b5676c8f0c6",
+    "backend/src/modviirs/data/queries.py": "63f052cc34272400ad28b61fe8183d480220bbee"
+  },
   "viewport": {
-    "width": 1440,
-    "height": 960
+    "width": 1600,
+    "height": 1000
   },
-  "method": "Capturas nativas de Chromium vía CDP; controles reales de la aplicación; sin datos simulados ni edición de las imágenes.",
-  "state": {
-    "dates": [
-      "01/APR/24",
-      "07/APR/24"
-    ],
-    "step": "1",
-    "date": "04/Apr/2024",
-    "region": "22.64° N · 17.87° N\n93.39° W · 87.44° W\n×",
-    "calendar_view": [
-      "3",
-      "2024"
-    ],
-    "attribution": "Imagery: NASA GIBS / ESDIS"
-  },
-  "map": {
-    "file": "frontend/public/images/features/mapa-interactivo.jpg",
-    "width": 1440,
-    "height": 960
-  },
-  "timeline": {
-    "file": "frontend/public/images/features/linea-de-tiempo.jpg",
-    "clip": {
-      "x": 280,
-      "y": 690,
-      "width": 1160,
-      "height": 270
+  "browser_timezone": "America/Mexico_City",
+  "method": "Capturas JPEG nativas de Chromium vía CDP, viewport completo. Interacción con región, calendarios, escalas, teclado y cursor reales; sin respuestas simuladas, edición de las imágenes ni cambios al visualizador.",
+  "data_source": "backend/data/hotspots_harmonized.parquet y capas de actividad derivadas por el backend en backend/data/.derived/",
+  "local_preparation": "Se regeneraron en serie dos particiones dañadas de la caché ignorada por Git (activity_daily/2006_MODIS y activity_grid/2022_VIIRS) desde el Parquet armonizado; se validó la lectura completa de ambas capas. No se modificaron el código del backend ni los datos fuente.",
+  "captures": [
+    {
+      "file": "frontend/public/images/features/mapa-interactivo.jpg",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "state": {
+        "date": "04/Apr/2024",
+        "dates": [
+          "01/APR/24",
+          "30/APR/24"
+        ],
+        "region": "22.44° N · 17.87° N\n93.32° W · 87.29° W\n×",
+        "mode": [
+          "2D",
+          "Días"
+        ],
+        "sidebar": "573 hotspots · 2024-04-04",
+        "peak": "Pico 2,558 · 26/APR/24",
+        "hover": null,
+        "analysisOpen": false,
+        "charts": [],
+        "attribution": "Imagery: NASA GIBS / ESDIS"
+      },
+      "sha256": "17509ec02ff40e931d1c536631757ae9e4ced59c0eff41bbbbc5fc321dff4555"
+    },
+    {
+      "file": "frontend/public/images/features/linea-de-tiempo.jpg",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "state": {
+        "date": "08/Apr/2024",
+        "dates": [
+          "01/APR/24",
+          "30/APR/24"
+        ],
+        "region": "22.44° N · 17.87° N\n93.32° W · 87.29° W\n×",
+        "mode": [
+          "2D",
+          "Semanas"
+        ],
+        "sidebar": "6,738 hotspots · 2024-04-08 → 2024-04-14",
+        "peak": "Pico 2,558 · 26/APR/24",
+        "hover": null,
+        "analysisOpen": false,
+        "charts": [],
+        "attribution": "Imagery: NASA GIBS / ESDIS"
+      },
+      "sha256": "a29701b679264a861dadac8d650d1e26f3eee5f05ff862e69820afc671fadeec"
+    },
+    {
+      "file": "frontend/public/images/features/picos-timeline.jpg",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "state": {
+        "date": "26/Apr/2024",
+        "dates": [
+          "01/APR/24",
+          "30/APR/24"
+        ],
+        "region": "22.44° N · 17.87° N\n93.32° W · 87.29° W\n×",
+        "mode": [
+          "2D",
+          "Días"
+        ],
+        "sidebar": "2,879 hotspots · 2024-04-26",
+        "peak": "Pico 2,558 · 26/APR/24",
+        "hover": "19/APR/24 · 1,719 hotspots",
+        "analysisOpen": false,
+        "charts": [],
+        "attribution": "Imagery: NASA GIBS / ESDIS"
+      },
+      "sha256": "aae4c7e578fa1a46f5583f5f84f7b8d8b2eaeaea26ffe94e064dc89a8f58ed57"
+    },
+    {
+      "file": "frontend/public/images/features/modulo-analisis.jpg",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "state": {
+        "date": "26/Apr/2024",
+        "dates": [
+          "01/APR/24",
+          "30/APR/24"
+        ],
+        "region": "22.44° N · 17.87° N\n93.32° W · 87.29° W\n×",
+        "mode": [
+          "2D",
+          "Días"
+        ],
+        "sidebar": "2,879 hotspots · 2024-04-26",
+        "peak": "Pico 2,558 · 26/APR/24",
+        "hover": null,
+        "analysisOpen": true,
+        "charts": [
+          "Pico: 2,558 hotspots · 26/Apr/2024",
+          "Pico: 35,318 MW · 26/Apr/2024"
+        ],
+        "attribution": "Imagery: NASA GIBS / ESDIS"
+      },
+      "sha256": "4c71d5dda7dc9e56f053d8aa605cdaef55a57c9332834a9ec606c69d1b3c4f70"
     }
-  },
+  ],
   "api_responses": [
     {
-      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-01&end=2024-04-01",
+      "url": "http://localhost:5173/api/fires/calendar?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&sensor_group=VIIRS",
       "status": 200,
-      "count": 978,
-      "truncated": false
+      "rows": 168,
+      "sensor_group": "VIIRS"
     },
     {
-      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-03&end=2024-04-03",
+      "url": "http://localhost:5173/api/fires/medians?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&sensor_group=VIIRS",
       "status": 200,
-      "count": 475,
-      "truncated": false
+      "rows": 12,
+      "sensor_group": "VIIRS"
     },
     {
-      "url": "http://localhost:5173/api/fires/points?lat_min=17.86890510354742&lat_max=22.637856759515174&lon_min=-93.39475662772213&lon_max=-87.4416683953857&start=2024-04-04&end=2024-04-04",
+      "url": "http://localhost:5173/api/fires/timeline?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&start=2024-04-01&end=2024-04-30&sensor_group=VIIRS",
       "status": 200,
+      "rows": 30,
+      "sensor_group": "VIIRS",
+      "series_total": 35096,
+      "peak": {
+        "date": "Fri, 26 Apr 2024 00:00:00 GMT",
+        "n_hotspots": 2558,
+        "frp_sum": 35318.01997992396
+      }
+    },
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&start=2024-04-04&end=2024-04-04",
+      "status": 200,
+      "rows": 573,
       "count": 573,
+      "truncated": false
+    },
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&start=2024-04-08&end=2024-04-14",
+      "status": 200,
+      "rows": 6738,
+      "count": 6738,
+      "truncated": false
+    },
+    {
+      "url": "http://localhost:5173/api/fires/points?lat_min=17.872146910246087&lat_max=22.44309898984858&lon_min=-93.32363524530386&lon_max=-87.29307174684968&start=2024-04-26&end=2024-04-26",
+      "status": 200,
+      "rows": 2879,
+      "count": 2879,
       "truncated": false
     }
   ],
-  "deferred_by_user": [
-    "Análisis de picos de la timeline",
-    "Módulo de análisis con gráficas"
-  ]
+  "uncaught_exceptions": [],
+  "deferred_by_user": [],
+  "landing_verification": {
+    "language": "en",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 320,
+        "height": 800
+      },
+      {
+        "width": 768,
+        "height": 1024
+      }
+    ],
+    "image_count": 5,
+    "source_link_count": 10,
+    "all_images_loaded_and_dimensions_match": true,
+    "all_images_have_alt": true,
+    "no_horizontal_overflow_or_clipped_card_content": true,
+    "no_provisional_sections": true,
+    "bento_effects": {
+      "spotlight_and_border": {
+        "hot": 0.324,
+        "near": 0.367
+      },
+      "click_wave": 0.826
+    },
+    "live_reduced_motion_change": {
+      "animatedGrids": 0,
+      "hiddenCards": 0,
+      "particleControl": false
+    },
+    "uncaught_exceptions": [],
+    "frontend_lint": "Passes; two pre-existing Fast Refresh warnings in button.tsx and toggle.tsx.",
+    "frontend_build": "TypeScript and Vite pass; pre-existing map bundle size warning.",
+    "navigation_and_metadata_restore": {
+      "before": {
+        "lang": "en",
+        "description": "MODVIIRS — Explore harmonized MODIS and VIIRS hotspot data, activity patterns and weekly anomaly forecasts.",
+        "skipLinkOffscreen": true
+      },
+      "after": {
+        "lang": "es",
+        "description": "MODVIIRS: calendario de actividad de focos MODIS y VIIRS",
+        "route": "/map"
+      }
+    }
+  },
+  "prediction_capture": {
+    "captured_utc": "2026-11-15T16:44:48.845Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1200
+    },
+    "state": {
+      "dates": [
+        "01/APR/24",
+        "30/APR/24"
+      ],
+      "selected": "22/Apr/2024",
+      "forecast": "INTELIGENCIA DE ALERTA TEMPRANA\nPronóstico de anomalías\n\nMéxico — 125 zonas bajo vigilancia\n\nREPLAY 2023–25\n56%\nRIESGO PICO\nCRÍTICO\n9.2\nzonas que romperían su récord estacional\n7\nzonas que realmente lo hicieron\n0.9×\nactividad vs. una semana típica\n\nPara la semana del 22 abr 2024, el modelo detecta un riesgo crítico de actividad anómala de puntos de calor en 125 zonas monitoreadas — se espera que unas 9.2 zonas superen su máximo histórico para esas fechas. Contraste con la realidad: 7 lo hicieron.\n\nSEMANA SIGUIENTE\n54%\nCRÍTICO · 29 abr 2024\n≈11 zonas esperadas\nPICO DE 2024\n73%\nCRÍTICO · 3 jun 2024\n≈21 zonas esperadas\nACTIVIDAD DE FUEGO VS. RANGO NORMAL\n2023\n2024\ndías-fuego detectados por satélite\nrango normal (típico → máximo estacional)\nPRONÓSTICO VS. REALIDAD\n2023\n2024\nzonas pronosticadas como anómalas\nzonas que fueron anómalas\n8.5/10\n\nPrecisión comprobada. En 8.5 de cada 10 comparaciones, el modelo coloca una zona que se volvió anómala por encima de una que no — vs 5.5/10 usando promedios históricos (repetición fuera de muestra 2023–2025).\n\nAnomalía = una zona con más días-fuego que su percentil 90 histórico para esa época del año. Un punto de calor no es un incendio. Zonas de ~110 km · NASA FIRMS VIIRS armonizado + clima NASA POWER.",
+      "region": "25.57° N · 13.83° N\n104.77° W · 81.37° W\n×",
+      "charts": 2,
+      "attribution": "Imagery: NASA GIBS / ESDIS"
+    },
+    "api_responses": [
+      {
+        "url": "http://localhost:5173/api/fires/timeline?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304&start=2024-04-01&end=2025-12-31&sensor_group=VIIRS",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/fires/timeline?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304&start=2024-04-01&end=2024-04-30&sensor_group=VIIRS",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/fires/points?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304&start=2024-04-01&end=2024-04-30",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/predictions?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304",
+        "status": 503
+      },
+      {
+        "url": "http://localhost:5173/api/predictions/validation",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/predictions/global/countries",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/predictions/series?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304",
+        "status": 200
+      },
+      {
+        "url": "http://localhost:5173/api/fires/points?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304&start=2024-04-22&end=2024-04-28",
+        "status": 200
+      }
+    ],
+    "uncaught_exceptions": [],
+    "file": "frontend/public/images/features/pronostico.jpg",
+    "sha256": "9373b603129b5404a56795e36bbd1d022dd12696142868c1aa7c9f5dc8e254f3",
+    "local_commit": "49f608b873353f2ddfa6adbc3e1e4aa78fc3183b",
+    "source_blobs": {
+      "frontend/src/features/map/ForecastDashboard.tsx": "b32643cd78a1b4c1c3587e09dc0953e23538b1d5",
+      "frontend/src/features/map/AnalysisPanel.tsx": "4fe3a922b53f40830d05ceda1e329b5676c8f0c6",
+      "backend/src/modviirs/services/global_prediction_service.py": "4f7c48a205df765cc9b202f9162bf31290069d11"
+    },
+    "method": "Native Chromium JPEG via CDP and real application controls. Historical replay, not a current-week forecast. No training, authenticated refresh, intercepted API responses or image editing.",
+    "verified_api_responses": [
+      {
+        "url": "http://localhost:5173/api/predictions/validation",
+        "status": 200,
+        "description": "Existing validation metadata read by the forecast interface; not a new validation run."
+      },
+      {
+        "url": "http://localhost:5173/api/predictions/global/countries",
+        "status": 200,
+        "countries": [
+          "Angola",
+          "Australia",
+          "Brasil",
+          "RD del Congo",
+          "México",
+          "Rusia"
+        ]
+      },
+      {
+        "url": "http://localhost:5173/api/predictions/series?lat_min=13.830736410216645&lat_max=25.572089903622285&lon_min=-104.77474586979099&lon_max=-81.37185353042304",
+        "status": 200,
+        "scale": "global_1deg",
+        "countries": [
+          "México"
+        ],
+        "zones": 125,
+        "week": {
+          "anomalias": 7.0,
+          "esperadas": 9.23,
+          "fuente": "historico",
+          "p50": 7133.5,
+          "p90": 11381.7,
+          "prob_max": 0.56,
+          "prob_media": 0.074,
+          "semana": "2024-04-22",
+          "valor": 6329.0,
+          "zonas": 125,
+          "zonas_alto": 4
+        }
+      }
+    ],
+    "interpretation": "The gauge is the maximum zone probability. The UI trust score derives from AUC, not the percentage of correct forecasts. The landing does not advertise it as accuracy."
+  }
 }
