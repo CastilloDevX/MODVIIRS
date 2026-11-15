@@ -179,3 +179,14 @@ export function Card({ title, note, index, children }: { title: string; note?: s
     </section>
   )
 }
+
+export function Kpi({ label, value, unit, decimals = 0, text, color }: { label: string; value?: number | null; unit?: string; decimals?: number; text?: string; color?: string }) {
+  return (
+    <div className="kpi">
+      <span className="kpi-label">{label}</span>
+      <span className="kpi-value" style={color ? { color } : undefined}>
+        {value === undefined || value === null ? (text ?? '—') : <CountUp value={value} decimals={decimals} />}{unit && <small>{unit}</small>}
+      </span>
+    </div>
+  )
+}

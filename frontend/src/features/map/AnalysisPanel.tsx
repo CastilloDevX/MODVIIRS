@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import type { QueryState } from '../../lib/useFireQuery'
 import type { CalendarResponse, MediansResponse, PointsResponse, TimelineResponse } from '../../lib/types'
-import { AreaChart, BandChart, BarList, Card, CountUp, Donut, Heatmap, Histogram } from './charts'
+import { AreaChart, BandChart, BarList, Card, Donut, Heatmap, Histogram, Kpi } from './charts'
 import { addDays, formatLong } from './dates'
 import { ForecastDashboard } from './ForecastDashboard'
 import type { Bbox } from './region'
@@ -29,15 +29,6 @@ function Async<T>({ state, children }: { state: QueryState<T>; children: (data: 
   if (state.error) return <p className="card-error">No disponible: {state.error}</p>
   if (!state.data) return <div className="skeleton" aria-busy="true">Cargando…</div>
   return <>{children(state.data)}</>
-}
-
-function Kpi({ label, value, unit, decimals = 0, text }: { label: string; value?: number; unit?: string; decimals?: number; text?: string }) {
-  return (
-    <div className="kpi">
-      <span className="kpi-label">{label}</span>
-      <span className="kpi-value">{value === undefined ? text : <CountUp value={value} decimals={decimals} />}{unit && <small>{unit}</small>}</span>
-    </div>
-  )
 }
 
 export function AnalysisPanel({ region, start, end, days, timeline, calendar, medians, points, windowStart, windowEnd, stepFrom, stepTo, onClose }: Props) {
@@ -67,7 +58,7 @@ export function AnalysisPanel({ region, start, end, days, timeline, calendar, me
       </div>
 
       {/* Modelo predictivo (rama predictivo): semana del cursor del timeline */}
-      {view === 'pronostico' && <ForecastDashboard region={region} date={addDays(start, stepFrom)} embedded />}
+      {view === 'pronostico' && <ForecastDashboard region={region} date={addDays(start, stepFrom)} />}
 
       {view === 'historico' && <>
 

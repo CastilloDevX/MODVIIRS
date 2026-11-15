@@ -1,78 +1,14 @@
-/* Early-warning dashboard (ForecastDashboard.tsx) */
-.fd-panel { position: fixed; top: 16px; right: 64px; width: min(500px, calc(100vw - 360px)); max-height: calc(100dvh - 110px); overflow-y: auto; z-index: 5;
-  background: radial-gradient(120% 60% at 0% 0%, rgba(255,120,60,.16), transparent 60%), linear-gradient(180deg, rgba(22,22,28,.96), rgba(12,12,16,.97));
-  color: #fff; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06); backdrop-filter: blur(10px); font-family: var(--font-body); }
-.fd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-.fd-eyebrow { font: 700 9px var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: #ff9b5e; }
-.fd-head h2 { margin: 2px 0 0; font: 800 20px var(--font-body); letter-spacing: -.01em; }
-.fd-head p { margin: 3px 0 0; font-size: 11px; color: #a9a9b3; }
-.fd-head-right { display: flex; align-items: center; gap: 6px; }
-.fd-head button { background: rgba(255,255,255,.06); border: 0; color: #ccc; font-size: 16px; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; }
-.fd-badge { font: 700 9px var(--font-body); letter-spacing: .1em; padding: 4px 8px; border-radius: 999px; background: rgba(139,123,255,.18); color: #b9afff; white-space: nowrap; }
-.fd-badge.is-live { background: rgba(60,207,142,.15); color: #3ccf8e; animation: fd-blink 1.6s ease-in-out infinite; }
-.fd-hero { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; padding: 12px; border-radius: 14px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--alert) 16%, transparent), rgba(255,255,255,.02)); border: 1px solid color-mix(in srgb, var(--alert) 35%, transparent); }
-.fd-gauge { position: relative; width: 150px; height: 150px; }
-.fd-gauge svg { width: 100%; height: 100%; }
-.fd-gauge-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 11; stroke-linecap: round; }
-.fd-gauge-fill { fill: none; stroke-width: 11; stroke-linecap: round; transition: stroke-dasharray .3s; }
-.fd-gauge-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.fd-gauge-num { font: 900 46px/1 var(--font-body); letter-spacing: -.03em; }
-.fd-gauge-num small { font-size: 18px; font-weight: 700; margin-left: 1px; }
-.fd-gauge-label { font: 600 9px var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: #a9a9b3; margin-top: 4px; }
-.fd-hero-stats { display: flex; flex-direction: column; gap: 6px; }
-.fd-alert { align-self: flex-start; font: 900 11px var(--font-body); letter-spacing: .2em; padding: 4px 10px; border-radius: 999px; color: #111; background: var(--alert); }
-.fd-alert.pulse { animation: fd-pulse 1.4s ease-out infinite; }
-.fd-stat { display: flex; align-items: baseline; gap: 8px; }
-.fd-stat-num { font: 800 28px/1.05 var(--font-body); letter-spacing: -.02em; min-width: 62px; }
-.fd-stat-label { font-size: 11px; color: #c9c9d1; line-height: 1.25; }
-.fd-stat.is-muted .fd-stat-num { color: #666; }
-.fd-headline { margin: 0; font-size: 13px; line-height: 1.5; color: #e6e6ea; }
-.fd-headline b { color: #fff; }
-.fd-outlook { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-.fd-mini { background: rgba(255,255,255,.03); border: 1px solid #333; border-left-width: 3px; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; }
-.fd-mini-title { font: 700 9px var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: #a9a9b3; }
-.fd-mini-num { font: 800 24px/1.1 var(--font-body); }
-.fd-mini-sub { font-size: 10px; color: #b5b5bd; }
-.fd-h3 { margin: 4px 0 -4px; font: 700 10px var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: #a9a9b3; }
-.fd-panel > * { flex-shrink: 0; }
-.fd-chart { width: 100%; height: auto; aspect-ratio: 460 / 130; flex-shrink: 0; background: rgba(255,255,255,.025); border-radius: 10px; }
-.fd-axis { fill: #7d7d88; font-size: 9px; }
-.fd-band { fill: rgba(120,190,255,.16); stroke: rgba(120,190,255,.45); stroke-width: .8; }
-.fd-exp-line { fill: none; stroke: #a99bff; stroke-width: 1.6; }
-.fd-obs-dot { fill: #ff4d4f; stroke: #fff; stroke-width: .5; }
-.fd-cursor { stroke: #fff; stroke-width: 1.2; stroke-dasharray: 2 2; opacity: .85; }
-.fd-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 10px; color: #b5b5bd; }
+/* Forecast view (ForecastDashboard.tsx): reuses the cards, KPIs and chart styles of analysis.css. */
+.fd-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font: 400 10px var(--font-body); color: #b5b5bd; }
 .fd-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .fd-legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; }
-.fd-k-bar { background: linear-gradient(#ffb347, #ff5e3a); }
+.fd-k-bar { background: linear-gradient(#ffd600, #ff8f00); }
 .fd-k-band { background: rgba(120,190,255,.3); border: 1px solid rgba(120,190,255,.6); }
-.fd-k-exp { background: linear-gradient(rgba(139,123,255,.8), rgba(139,123,255,.15)); }
-.fd-k-obs { width: 8px !important; height: 8px !important; border-radius: 50% !important; background: #ff4d4f; }
-.fd-trust { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: linear-gradient(90deg, rgba(60,207,142,.14), rgba(60,207,142,.02)); border: 1px solid rgba(60,207,142,.3); }
-.fd-trust-num { font: 900 34px/1 var(--font-body); color: #3ccf8e; white-space: nowrap; }
-.fd-trust-num small { font-size: 14px; color: #7fdcb3; }
-.fd-trust p { margin: 0; font-size: 11px; line-height: 1.4; color: #d9efe5; }
-.fd-note { margin: 0; font-size: 10px; color: #80808a; line-height: 1.4; }
-@keyframes fd-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--alert) 70%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
-@keyframes fd-blink { 50% { opacity: .55; } }
-@media (max-width: 900px) { .fd-panel { position: static; width: auto; margin: 8px; } .fd-hero { grid-template-columns: 1fr; justify-items: center; } }
-
-/* Embedded variant: inside a side panel such as AnalysisPanel (380 px wide). */
-.fd-panel.is-embedded { position: static; width: auto; max-height: none; overflow: visible; z-index: auto; padding: 14px 12px 12px; border-radius: 12px; box-shadow: none; backdrop-filter: none; }
-.fd-panel.is-embedded .fd-head h2 { font-size: 17px; }
-.fd-panel.is-embedded .fd-hero { grid-template-columns: 112px 1fr; gap: 10px; padding: 10px; }
-.fd-panel.is-embedded .fd-gauge { width: 112px; height: 112px; }
-.fd-panel.is-embedded .fd-gauge-num { font-size: 34px; }
-.fd-panel.is-embedded .fd-gauge-num small { font-size: 14px; }
-.fd-panel.is-embedded .fd-gauge-label { font-size: 8px; letter-spacing: .08em; }
-.fd-panel.is-embedded .fd-stat-num { font-size: 22px; min-width: 44px; }
-.fd-panel.is-embedded .fd-stat-label { font-size: 10px; }
-.fd-panel.is-embedded .fd-headline { font-size: 12px; }
-.fd-panel.is-embedded .fd-mini-num { font-size: 20px; }
-.fd-panel.is-embedded .fd-trust-num { font-size: 28px; }
-.analysis-panel .fd-panel svg { overflow: hidden; }
+.fd-k-exp { background: linear-gradient(rgba(255,143,0,.8), rgba(255,143,0,.15)); }
+.fd-k-obs { width: 8px !important; height: 8px !important; border-radius: 50% !important; background: #e53935; }
+.fd-k-base { background: none; border-top: 2px dashed #9a9a9a; height: 0 !important; }
+.fd-band { fill: rgba(120,190,255,.16); stroke: rgba(120,190,255,.45); stroke-width: .8; }
+.analysis-panel .kpis .kpi .kpi-label + .kpi-value + .kpi-label { margin-top: 1px; }
 .analysis-tabs { display: flex; gap: 6px; animation: fade-up .6s .25s both; }
 .analysis-tabs button { flex: 1; height: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,.12); background: #1b1b1b; color: #bbb; font: 700 11px var(--font-body); letter-spacing: .04em; cursor: pointer; }
 .analysis-tabs button[aria-pressed="true"] { background: #fff; color: #111; border-color: #fff; }

@@ -13,6 +13,7 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ### Frontend
 
+- Vista PRONÓSTICO rediseñada con los mismos patrones del histórico: tarjetas animadas, KPIs, gráficos con la misma paleta y tipografía Prompt. Nuevas tarjetas «¿Hasta cuándo es confiable?» (AUC y AP por horizonte de 1, 2 y 4 semanas frente a la línea base) y «Calibración».
 - Panel de análisis: todo en Prompt (se añadió el peso 700, que faltaba) y sensor fijo en VIIRS, sin selector.
 - La página principal es ahora `/`; la ruta `/map` ya no existe (da 404). Se retiró el «Hola mundo».
 - Calendario principal: cada día con hotspots se pinta amarillo, naranja o rojo según su intensidad (conteo diario en escala log frente al día pico de la región; 0–0.4, 0.4–0.7, 0.7–1), con leyenda. Inicio y fin del rango llevan borde blanco.
