@@ -15,6 +15,7 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ### Frontend
 
+- La landing (`/landing`) está completamente en inglés (textos, botones, etiquetas accesibles, nombres de sección y ids de anclas) y `<html lang>` pasa a `en`. Las capturas de `public/images/features/` son imágenes de una versión anterior del visualizador y conservan algunas etiquetas en español (meses, días, «Sin nubes/Oscuro»).
 - PREDICTIONS: la confiabilidad de cada día ahora depende de la época del año (precisión comprobada por semana del año, ventana de ±2 semanas) y de la distancia a la fecha establecida, por lo que aparecen días amarillos (abril–junio, cuando el modelo es menos preciso). Nuevas gráficas: confiabilidad a lo largo del año, pronóstico vs. realidad por año, error del modelo vs. error de la línea base, precisión del modelo vs. línea base por año y calibración. Se quitó la tarjeta «How far ahead can it be trusted?».
 - La página `/` está completamente en inglés (menús, paneles, gráficos, calendarios y etiquetas); la landing no se tocó.
 - Pestaña PREDICTIONS (antes FUTURE, antes PRONÓSTICO): solo futuro. El pronóstico empieza una semana después de la fecha establecida (la Final date) y cubre 2 semanas, el rango prometedor. El calendario solo carga esos meses, solo permite elegir fechas (sin selector de mes o año), abre con todo el periodo seleccionado desde el día 1 y muestra la confiabilidad en porcentaje. Se quitó el texto de ayuda bajo el calendario y las tarjetas que mostraban el pasado.

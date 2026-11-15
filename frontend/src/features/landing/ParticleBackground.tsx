@@ -55,11 +55,11 @@ export function ParticleBackground() {
         <button
           type="button"
           className="landing-motion-toggle"
-          aria-label={paused ? 'Reanudar animación de partículas' : 'Pausar animación de partículas'}
+          aria-label={paused ? 'Resume particle animation' : 'Pause particle animation'}
           onClick={() => setPaused(value => !value)}
         >
           {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
-          {paused ? 'Reanudar animación' : 'Pausar animación'}
+          {paused ? 'Resume animation' : 'Pause animation'}
         </button>
       )}
     </>

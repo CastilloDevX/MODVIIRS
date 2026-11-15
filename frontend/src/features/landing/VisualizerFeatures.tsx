@@ -12,7 +12,7 @@ export function VisualizerFeatures() {
             <p>{feature.description}</p>
             {feature.screenshot && (
               <figure className="landing-feature-capture">
-                <a href={feature.screenshot.src} target="_blank" rel="noreferrer" aria-label={`Ampliar captura: ${feature.title} (abre una pestaña nueva)`}>
+                <a href={feature.screenshot.src} target="_blank" rel="noreferrer" aria-label={`Enlarge screenshot: ${feature.title} (opens in a new tab)`}>
                   <img
                     src={feature.screenshot.src}
                     alt={feature.screenshot.alt}

@@ -1,32 +1,32 @@
-// Textos de la landing: editar aquí sin cambiar la composición de la página.
+// Landing page copy: edit here without changing the page layout.
 export const landingSections = [
-  { id: 'armonizacion', label: 'Armonización', number: '01' },
-  { id: 'visualizador', label: 'Visualizador', number: '02' },
-  { id: 'prediccion', label: 'Predicción', number: '03' },
-  { id: 'bibliografia', label: 'Bibliografía', number: '04' },
+  { id: 'harmonization', label: 'Harmonization', number: '01' },
+  { id: 'visualizer', label: 'Visualizer', number: '02' },
+  { id: 'prediction', label: 'Prediction', number: '03' },
+  { id: 'bibliography', label: 'Bibliography', number: '04' },
 ] as const
 
-// Síntesis del informe de armonización del proyecto; procedencia y límites en docs/fuentes/nasa.md.
+// Summary of the project's harmonization report; provenance and limits in docs/fuentes/nasa.md.
 export const harmonizationSteps = [
   {
     number: '00',
-    title: 'Acotar los datos',
-    description: 'Se seleccionaron Brasil, RD del Congo, Angola, Australia y Rusia por su elevado número de detecciones. México se añadió como caso de contraste.',
+    title: 'Scoping the data',
+    description: 'Brazil, DR Congo, Angola, Australia and Russia were selected for their high number of detections. Mexico was added as a contrast case.',
   },
   {
     number: '01',
-    title: 'Análisis exploratorio de datos',
-    description: 'Se compararon conteos, potencia radiativa (FRP) y horarios de paso en el solapamiento 2012–2024 para identificar diferencias entre sensores, fuentes persistentes y huecos de datos.',
+    title: 'Exploratory data analysis',
+    description: 'Counts, fire radiative power (FRP) and overpass times were compared over the 2012–2024 overlap to identify differences between sensors, persistent sources and data gaps.',
   },
   {
     number: '02',
-    title: 'Elegir la estrategia de armonización',
-    description: 'Una rejilla común de 0.1° registra días con detecciones por celda y mes. La actividad se expresa como anomalías y percentiles respecto a la historia de cada sensor.',
+    title: 'Choosing the harmonization strategy',
+    description: 'A common 0.1° grid records days with detections per cell and month. Activity is expressed as anomalies and percentiles against each sensor\'s own history.',
   },
   {
     number: '03',
-    title: 'Resultados',
-    description: 'Se generaron dos capas para 2000–2025: detecciones individuales y actividad mensual en rejilla. El ajuste por cambios en la constelación de satélites sigue pendiente.',
+    title: 'Results',
+    description: 'Two layers were produced for 2000–2025: individual detections and monthly gridded activity. Adjusting for changes in the satellite constellation is still pending.',
   },
 ] as const
 
@@ -38,36 +38,36 @@ type VisualizerFeature = {
 
 export const visualizerFeatures: readonly VisualizerFeature[] = [
   {
-    title: 'Mapa interactivo',
-    description: 'Explora las detecciones en 3D o 2D, cambia la imagen de fondo y selecciona la región que quieres consultar.',
+    title: 'Interactive map',
+    description: 'Explore detections in 3D or 2D and select the region you want to look at.',
     screenshot: {
       src: '/images/features/mapa-interactivo.jpg',
-      alt: 'Visualizador MODVIIRS con mapa, región seleccionada y detecciones de abril de 2024.',
-      caption: 'Una región, sus detecciones y el contexto del mapa.',
+      alt: 'MODVIIRS visualizer with a map, a selected region and detections from April 2024.',
+      caption: 'A region, its detections and the map context.',
       width: 1440,
       height: 960,
     },
   },
   {
-    title: 'Timeline de datos armonizados',
-    description: 'Recorre el periodo seleccionado por días o intervalos y observa cómo cambian las detecciones que aparecen en el mapa.',
+    title: 'Harmonized data timeline',
+    description: 'Move through the selected period by days or intervals and watch how the detections on the map change.',
     screenshot: {
       src: '/images/features/linea-de-tiempo.jpg',
-      alt: 'Control temporal de MODVIIRS con un día seleccionado dentro del rango de abril de 2024.',
-      caption: 'Desplázate por las fechas con el cursor o el teclado.',
+      alt: 'MODVIIRS timeline control with one day selected within the April 2024 range.',
+      caption: 'Move through the dates with the cursor or the keyboard.',
       width: 1160,
       height: 270,
     },
   },
   {
-    title: 'Análisis de picos de la timeline',
-    description: 'Identifica los días de mayor actividad en el rango seleccionado y consulta el pico junto a la evolución diaria de las detecciones.',
+    title: 'Timeline peak analysis',
+    description: 'Spot the most active days in the selected range and read the peak alongside the daily evolution of detections.',
   },
   {
-    title: 'Módulo de análisis con gráficas',
-    description: 'Consulta distribuciones de potencia radiativa (FRP), datos por satélite, un calendario de anomalías y la estacionalidad en un mismo panel.',
+    title: 'Analysis module with charts',
+    description: 'See radiative power (FRP) distributions, per-satellite data, an anomaly calendar and seasonality in a single panel.',
   },
 ]
 
-export const predictionTopics = ['Descripción del modelo', 'Entrenamiento y evaluación', 'Resultados y limitaciones']
-export const bibliographyTopics = ['Referencia 01', 'Referencia 02', 'Referencia 03']
+export const predictionTopics = ['Model description', 'Training and evaluation', 'Results and limitations']
+export const bibliographyTopics = ['Reference 01', 'Reference 02', 'Reference 03']
