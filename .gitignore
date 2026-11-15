@@ -12,3 +12,9 @@ __pycache__/
 coverage/
 .coverage
 .DS_Store
+
+# Data files (large, regenerated from pipeline)
+backend/data/*.parquet
+backend/data/*.csv
+backend/data/*.nc
+backend/data/*.hdf
