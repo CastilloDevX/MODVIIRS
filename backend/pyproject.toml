@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.14,<1"]
+dev = ["pytest>=8,<10", "ruff>=0.14,<1", "flasgger>=0.9,<1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

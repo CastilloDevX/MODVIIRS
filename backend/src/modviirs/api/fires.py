@@ -46,6 +46,40 @@ def _parse_point_filters():
 
 @fires.get("/fires/calendar")
 def get_calendar():
+    """
+    Monthly fire activity history for an area of interest.
+    ---
+    tags:
+      - Fires
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+      - name: sensor_group
+        in: query
+        type: string
+        required: false
+        default: VIIRS
+        description: "Sensor group (VIIRS or MODIS)."
+    responses:
+      200:
+        description: Monthly fire counts per year.
+      400:
+        description: Missing or invalid bbox parameters.
+    """
     try:
         lat_min, lat_max, lon_min, lon_max = _parse_bbox()
     except (KeyError, ValueError):
@@ -57,6 +91,40 @@ def get_calendar():
 
 @fires.get("/fires/medians")
 def get_medians():
+    """
+    Historical fire seasonality statistics for an area of interest.
+    ---
+    tags:
+      - Fires
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+      - name: sensor_group
+        in: query
+        type: string
+        required: false
+        default: VIIRS
+        description: "Sensor group (VIIRS or MODIS)."
+    responses:
+      200:
+        description: Median fire counts by day-of-year.
+      400:
+        description: Missing or invalid bbox parameters.
+    """
     try:
         lat_min, lat_max, lon_min, lon_max = _parse_bbox()
     except (KeyError, ValueError):
@@ -68,6 +136,52 @@ def get_medians():
 
 @fires.get("/fires/timeline")
 def get_timeline():
+    """
+    Day-by-day fire counts for a date range and area of interest.
+    ---
+    tags:
+      - Fires
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+      - name: start
+        in: query
+        type: string
+        required: true
+        description: "Start date (YYYY-MM-DD)."
+        example: "2024-01-01"
+      - name: end
+        in: query
+        type: string
+        required: true
+        description: "End date (YYYY-MM-DD)."
+        example: "2024-03-31"
+      - name: sensor_group
+        in: query
+        type: string
+        required: false
+        default: VIIRS
+        description: "Sensor group (VIIRS or MODIS)."
+    responses:
+      200:
+        description: Daily fire counts within the requested date range.
+      400:
+        description: Missing or invalid parameters.
+    """
     try:
         lat_min, lat_max, lon_min, lon_max = _parse_bbox()
     except (KeyError, ValueError):
@@ -86,6 +200,78 @@ def get_timeline():
 
 @fires.get("/fires/points")
 def get_points():
+    """
+    Individual hotspot fire detections (JSON, capped at 50 000 records).
+    ---
+    tags:
+      - Fires
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+      - name: start
+        in: query
+        type: string
+        required: true
+        description: "Start date (YYYY-MM-DD)."
+        example: "2024-01-01"
+      - name: end
+        in: query
+        type: string
+        required: true
+        description: "End date (YYYY-MM-DD)."
+        example: "2024-03-31"
+      - name: sensor_group
+        in: query
+        type: string
+        required: false
+        default: VIIRS
+        description: "Sensor group (VIIRS or MODIS)."
+      - name: satellite
+        in: query
+        type: string
+        required: false
+        description: "Specific satellite identifier."
+      - name: frp_comparable
+        in: query
+        type: boolean
+        required: false
+        description: "Filter to FRP-comparable observations only."
+      - name: exclude_persistent
+        in: query
+        type: boolean
+        required: false
+        description: "Exclude persistent hotspot detections."
+    responses:
+      200:
+        description: Hotspot points with count and truncation flag.
+        schema:
+          type: object
+          properties:
+            count:
+              type: integer
+            truncated:
+              type: boolean
+            data:
+              type: array
+              items:
+                type: object
+      400:
+        description: Missing or invalid parameters.
+    """
     try:
         lat_min, lat_max, lon_min, lon_max = _parse_bbox()
     except (KeyError, ValueError):
@@ -103,6 +289,69 @@ def get_points():
 
 @fires.get("/fires/points.csv")
 def get_points_csv():
+    """
+    Individual hotspot fire detections as a CSV download (full dataset, no cap).
+    ---
+    tags:
+      - Fires
+    produces:
+      - text/csv
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+      - name: start
+        in: query
+        type: string
+        required: true
+        description: "Start date (YYYY-MM-DD)."
+        example: "2024-01-01"
+      - name: end
+        in: query
+        type: string
+        required: true
+        description: "End date (YYYY-MM-DD)."
+        example: "2024-03-31"
+      - name: sensor_group
+        in: query
+        type: string
+        required: false
+        default: VIIRS
+      - name: satellite
+        in: query
+        type: string
+        required: false
+      - name: frp_comparable
+        in: query
+        type: boolean
+        required: false
+      - name: exclude_persistent
+        in: query
+        type: boolean
+        required: false
+    responses:
+      200:
+        description: CSV file attachment.
+        headers:
+          Content-Disposition:
+            type: string
+            description: "attachment; filename=hotspots.csv"
+      400:
+        description: Missing or invalid parameters.
+    """
     try:
         lat_min, lat_max, lon_min, lon_max = _parse_bbox()
     except (KeyError, ValueError):
@@ -125,4 +374,30 @@ def get_points_csv():
 
 @fires.get("/fires/current")
 def get_current():
+    """
+    Current month near-real-time fire activity (not yet implemented).
+    ---
+    tags:
+      - Fires
+    parameters:
+      - name: lat_min
+        in: query
+        type: number
+        required: true
+      - name: lat_max
+        in: query
+        type: number
+        required: true
+      - name: lon_min
+        in: query
+        type: number
+        required: true
+      - name: lon_max
+        in: query
+        type: number
+        required: true
+    responses:
+      501:
+        description: Not yet implemented.
+    """
     return jsonify(status="not_implemented"), 501
