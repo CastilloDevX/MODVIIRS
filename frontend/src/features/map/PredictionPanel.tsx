@@ -19,7 +19,7 @@ export function PredictionPanel({ view, onViewChange, live, shown, monday, loadi
   return (
     <section className="field pred-panel" aria-label="Hotspot anomaly forecast">
       <h2 className="label">Anomaly forecast · Yucatán</h2>
-      <ToggleGroup variant="outline" className="w-full" value={[view]} aria-label="Forecast view"
+      <ToggleGroup variant="outline" className="w-full pred-toggle" value={[view]} aria-label="Forecast view"
         onValueChange={v => { if (v[0]) onViewChange(v[0] as ForecastView) }}>
         <ToggleGroupItem value="timeline" className="flex-1">Timeline</ToggleGroupItem>
         <ToggleGroupItem value="current" className="flex-1" disabled={!live}>This wk</ToggleGroupItem>

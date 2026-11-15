@@ -49,7 +49,8 @@ class FIRMSClient:
         while d <= end:
             n = min(5, (end - d).days + 1)
             txt = self.fetch_area(source, bbox_lonlat, n, d.isoformat())
-            df = pd.read_csv(io.StringIO(txt), dtype={"acq_time": str, "confidence": str})
+            tipos = {"acq_time": str, "confidence": str, "version": str}
+            df = pd.read_csv(io.StringIO(txt), dtype=tipos)
             if len(df):
                 partes.append(df)
             d += timedelta(days=n)

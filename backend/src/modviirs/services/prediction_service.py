@@ -106,8 +106,11 @@ def descargar_firms(cfg, hoy: date) -> pd.DataFrame:
     if desde <= hoy:
         partes.append(client.fetch_range(FUENTE_NRT, BBOX, desde, hoy).assign(fuente="NRT"))
     det = pd.concat([p for p in partes if len(p)], ignore_index=True)
-    det["acq_date"] = det.acq_date.astype(str)
-    det["acq_time"] = det.acq_time.astype(str)
+    # SP trae version "2" y NRT "2.0NRT": todo texto para que el parquet acepte la mezcla
+    texto = ["acq_date", "acq_time", "version", "confidence", "satellite", "instrument", "daynight"]
+    for c in texto:
+        if c in det:
+            det[c] = det[c].astype(str)
     det.to_parquet(ruta, index=False)
     return det
 

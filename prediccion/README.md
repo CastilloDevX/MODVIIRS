@@ -50,17 +50,17 @@ El modelo vive en `backend/src/modviirs/` siguiendo la arquitectura del repo:
 | `clients/firms_client.py` | FIRMS Area API (ventanas de 5 días; `data_availability`) |
 | `clients/power_client.py` | NASA POWER diario por punto |
 | `services/prediction_service.py` | `actualizar()`: FIRMS NOAA-20 2026 (SP + NRT) → reglas de Alexis → días con fuego → POWER → modelo → `data/prediccion/cache/prediccion_actual.json`. También las lecturas para los endpoints y `snapshot()` |
-| `api/predictions.py` | Endpoints `/api/v1/predictions…` |
+| `api/predictions.py` | Endpoints `/api/predictions…` |
 
 Artefactos (generados por `prediccion/src/p04_exportar_backend.py`): `backend/data/prediccion/` (historia por zona, semanas, zonas, POWER 2002–2025, predicciones walk-forward y `validacion.json`).
 
 **Endpoints**
 | Ruta | Devuelve |
 |---|---|
-| `GET /api/v1/predictions[?lat_min&lat_max&lon_min&lon_max]` | GeoJSON de la semana en curso (H = 1) y la próxima (H = 2), con prob, nivel, base, p50/p90, valor y anomalía |
-| `GET /api/v1/predictions/weeks` | Semanas disponibles (histórico walk-forward y vivo 2026) |
-| `GET /api/v1/predictions/week/YYYY-MM-DD` | GeoJSON de una semana (lunes) |
-| `GET /api/v1/predictions/validation` | Métricas walk-forward, calibración, Wilcoxon, falsas anomalías y temporada 2026 en vivo |
+| `GET /api/predictions[?lat_min&lat_max&lon_min&lon_max]` | GeoJSON de la semana en curso (H = 1) y la próxima (H = 2), con prob, nivel, base, p50/p90, valor y anomalía |
+| `GET /api/predictions/weeks` | Semanas disponibles (histórico walk-forward y vivo 2026) |
+| `GET /api/predictions/week/YYYY-MM-DD` | GeoJSON de una semana (lunes) |
+| `GET /api/predictions/validation` | Métricas walk-forward, calibración, Wilcoxon, falsas anomalías y temporada 2026 en vivo |
 
 **Correr (PowerShell, desde `backend/`)**
 ```powershell

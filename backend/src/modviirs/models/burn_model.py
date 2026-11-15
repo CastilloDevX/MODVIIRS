@@ -19,11 +19,16 @@ Metodo (validado en la rama `predictivo`, ver prediccion/README.md):
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
+
+# semanas sin historia dan "Mean of empty slice" en nanmean: es esperado (resultado NaN)
+warnings.filterwarnings("ignore", message="Mean of empty slice", category=RuntimeWarning)
+warnings.filterwarnings("ignore", message="All-NaN slice", category=RuntimeWarning)
 
 S, W = 17.8, -92.5
 TAM_ZONA = 0.5

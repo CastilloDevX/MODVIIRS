@@ -29,6 +29,7 @@
 .day-labels span { position: absolute; transform: translateX(-50%); }
 
 .pred-panel { border-top: 1px solid #2a2a2a; padding-top: 12px; }
+.pred-toggle > * { font-size: 10px; padding-inline: 4px; min-width: 0; }
 .pred-info { font: 400 11px var(--font-body); color: #ddd; display: flex; flex-direction: column; gap: 3px; }
 .pred-legend { display: flex; flex-wrap: wrap; gap: 6px 10px; font: 400 10px var(--font-body); color: #ccc; }
 .pred-legend span { display: inline-flex; align-items: center; gap: 4px; }
