@@ -1,8 +1,7 @@
 import { useMemo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { QueryState } from '../../lib/useFireQuery'
-import type { CalendarResponse, MediansResponse, PointsResponse, SensorGroup, TimelineResponse } from '../../lib/types'
+import type { CalendarResponse, MediansResponse, PointsResponse, TimelineResponse } from '../../lib/types'
 import { AreaChart, BandChart, BarList, Card, CountUp, Donut, Heatmap, Histogram } from './charts'
 import { addDays, formatLong } from './dates'
 import type { Bbox } from './region'
@@ -14,8 +13,6 @@ type Props = {
   start: Date
   end: Date
   days: number
-  sensor: SensorGroup
-  onSensorChange: (s: SensorGroup) => void
   timeline: QueryState<TimelineResponse>
   calendar: QueryState<CalendarResponse>
   medians: QueryState<MediansResponse>
@@ -42,7 +39,7 @@ function Kpi({ label, value, unit, decimals = 0, text }: { label: string; value?
   )
 }
 
-export function AnalysisPanel({ region, start, end, days, sensor, onSensorChange, timeline, calendar, medians, points, windowStart, windowEnd, stepFrom, stepTo, onClose }: Props) {
+export function AnalysisPanel({ region, start, end, days, timeline, calendar, medians, points, windowStart, windowEnd, stepFrom, stepTo, onClose }: Props) {
   const rows = timeline.data?.data
   const range = useMemo(() => (rows ? rangeStats(rows, start, days) : null), [rows, start, days])
   const hot = useMemo(() => denseSeries(rows, start, days, 'n_hotspots'), [rows, start, days])
@@ -62,13 +59,7 @@ export function AnalysisPanel({ region, start, end, days, sensor, onSensorChange
         <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label="Ocultar panel de análisis">Ocultar ›</Button>
       </header>
 
-      <div className="sensor-row">
-        <span>Sensor (serie, calendario y estacionalidad)</span>
-        <ToggleGroup variant="outline" size="sm" value={[sensor]} aria-label="Sensor" onValueChange={v => { if (v[0]) onSensorChange(v[0] as SensorGroup) }}>
-          <ToggleGroupItem value="VIIRS">VIIRS 375 m</ToggleGroupItem>
-          <ToggleGroupItem value="MODIS">MODIS 1 km</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+      <p className="sensor-note">Sensor: VIIRS 375 m (serie diaria, calendario y estacionalidad)</p>
 
       <Card index={card++} title={`Resumen del rango · ${labels[0]} → ${labels[1]}`}>
         <Async state={timeline}>{() => range && (

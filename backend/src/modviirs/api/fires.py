@@ -1,13 +1,20 @@
 import datetime as dt
-import os
-import tempfile
 
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, Response, jsonify, request, stream_with_context
 
 from modviirs.data import queries as Q
 from modviirs.services import fire_service
 
 fires = Blueprint("fires", __name__)
+
+
+def _month_chunks(start: dt.date, end: dt.date):
+    """Splits [start, end] into one (first_day, last_day) range per calendar month."""
+    day = start
+    while day <= end:
+        nxt = dt.date(day.year + (day.month == 12), day.month % 12 + 1, 1)
+        yield day, min(end, nxt - dt.timedelta(days=1))
+        day = nxt
 
 
 def _parse_bbox():
@@ -532,21 +539,24 @@ def get_points_csv():
         return jsonify(error="start and end are required as YYYY-MM-DD"), 400
     filters = _parse_point_filters()
     bbox = (lat_min, lat_max, lon_min, lon_max)
-    # The sensor family column (MODIS/VIIRS) is dropped from the export. The file is
-    # streamed to disk, not built in memory: a wide area can have millions of rows.
-    lf = Q.aoi_points_lazy(bbox, start, end, **filters).drop("sensor_group")
-    fd, path = tempfile.mkstemp(suffix=".csv")
-    os.close(fd)
-    try:
-        lf.sink_csv(path)
-    except Exception:
-        os.remove(path)
-        raise
-    response = send_file(
-        path, mimetype="text/csv", as_attachment=True, download_name="hotspots.csv"
+    # The sensor family column (MODIS/VIIRS) is dropped from the export. The CSV is streamed
+    # month by month: a wide area over many years can be several GB, too big to hold in memory
+    # or to write to a temporary file.
+    def rows():
+        first = True
+        for chunk_start, chunk_end in _month_chunks(start, end):
+            df = Q.aoi_points_lazy(bbox, chunk_start, chunk_end, **filters).drop("sensor_group")
+            df = Q._collect(df)
+            if df.height == 0 and not first:
+                continue
+            yield df.write_csv(include_header=first)
+            first = False
+
+    return Response(
+        stream_with_context(rows()),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=hotspots.csv"},
     )
-    response.call_on_close(lambda: os.path.exists(path) and os.remove(path))
-    return response
 
 
 @fires.get("/fires/current")

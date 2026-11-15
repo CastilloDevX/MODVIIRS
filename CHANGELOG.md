@@ -8,10 +8,12 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 - `queries.py`: si `activity_daily.parquet` / `activity_grid.parquet` son punteros de Git LFS (sin `git lfs pull`), se regeneran desde `hotspots_harmonized.parquet` en `backend/data/.derived/` (ignorado por Git, un parquet por año y sensor, unos 45 s la primera vez). Corrige los errores 500 de `/fires/timeline`, `/calendar` y `/medians`.
 - `/fires/points.csv`: se genera en streaming a un archivo temporal (no en memoria) y ya no incluye la columna `sensor_group` (MODIS/VIIRS).
+- `/fires/points.csv` ahora se envía en streaming mes a mes (sin archivo temporal): antes fallaba con `Disk quota exceeded` / 500 en regiones grandes y rangos largos.
 - `aoi_calendar` ahora lee la actividad de forma perezosa (antes cargaba el parquet entero en memoria).
 
 ### Frontend
 
+- Panel de análisis: todo en Prompt (se añadió el peso 700, que faltaba) y sensor fijo en VIIRS, sin selector.
 - La página principal es ahora `/`; la ruta `/map` ya no existe (da 404). Se retiró el «Hola mundo».
 - Calendario principal: cada día con hotspots se pinta amarillo, naranja o rojo según su intensidad (conteo diario en escala log frente al día pico de la región; 0–0.4, 0.4–0.7, 0.7–1), con leyenda. Inicio y fin del rango llevan borde blanco.
 - Botón blanco «Export CSV» en la barra izquierda: descarga las detecciones de la región para el rango de fechas completo seleccionado.

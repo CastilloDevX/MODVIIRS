@@ -24,6 +24,8 @@ import './map.css'
 
 const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? pos : neg}`
 const BASEMAP = BASEMAPS[0].id
+/** The analysis (series, calendar, seasonality) always uses VIIRS. */
+const SENSOR: SensorGroup = 'VIIRS'
 
 export function MapPage() {
   const [range, setRange] = useState({ start: new Date(2012, 11, 1), end: new Date(2025, 11, 31) })
@@ -33,7 +35,6 @@ export function MapPage() {
   const [picking, setPicking] = useState(false)
   const [region, setRegion] = useState<Bbox | null>(null)
   const [phases, setPhases] = useState<PhaseId[]>(['yellow', 'orange', 'red'])
-  const [sensor, setSensor] = useState<SensorGroup>('VIIRS')
   const [panelOpen, setPanelOpen] = useState(true)
   const [mode, setMode] = useState<ViewMode>('3d')
   const days = diffDays(range.start, range.end)
@@ -44,9 +45,9 @@ export function MapPage() {
   const windowEnd = isoDate(addDays(range.start, stepEnd(offset, stops, days)))
   const { data: pointsResponse, loading, error } = useFiresPoints(region, windowStart, windowEnd, {})
 
-  const timeline = useFiresTimeline(region, isoDate(range.start), isoDate(range.end), sensor)
-  const calendar = useFiresCalendar(region, sensor)
-  const medians = useFiresMedians(region, sensor)
+  const timeline = useFiresTimeline(region, isoDate(range.start), isoDate(range.end), SENSOR)
+  const calendar = useFiresCalendar(region, SENSOR)
+  const medians = useFiresMedians(region, SENSOR)
   const timelineRows = timeline.data?.data
   const hoverSeries = timelineRows ? denseSeries(timelineRows, range.start, days, 'n_hotspots') : null
   const phaseDays = hoverSeries ? dayPhases(hoverSeries, range.start) : null
@@ -111,7 +112,7 @@ export function MapPage() {
           points={region ? pointsResponse?.data ?? null : null} truncated={region ? pointsResponse?.truncated ?? false : false}
           visiblePhases={phases}
           panel={region && !picking ? (panelOpen ? (
-            <AnalysisPanel key={`${region.west},${region.south},${region.east},${region.north}`} region={region} start={range.start} end={range.end} days={days} sensor={sensor} onSensorChange={setSensor}
+            <AnalysisPanel key={`${region.west},${region.south},${region.east},${region.north}`} region={region} start={range.start} end={range.end} days={days}
               timeline={timeline} calendar={calendar} medians={medians} points={pointsResponse}
               windowStart={windowStart} windowEnd={windowEnd} stepFrom={offset} stepTo={stepEnd(offset, stops, days)} onClose={() => setPanelOpen(false)} />
           ) : <button type="button" className="panel-tab" onClick={() => setPanelOpen(true)}>ANÁLISIS</button>) : null}

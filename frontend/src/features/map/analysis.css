@@ -1,8 +1,9 @@
+.analysis-panel, .analysis-panel *, .panel-tab, .map-filters, .map-filters *, .hover-chart, .hover-chart * { font-family: var(--font-body) !important; }
 .analysis-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 380px; z-index: 4; overflow-y: auto; overflow-x: hidden; padding: 14px 14px 24px; background: rgba(14,14,14,.94); backdrop-filter: blur(10px); border-left: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 12px; animation: panel-in .85s cubic-bezier(.2,1.4,.35,1) both; transform-origin: right center; }
 .analysis-panel header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; animation: fade-up .6s .2s both; }
 .analysis-panel h2 { margin: 0; font-size: 17px; letter-spacing: .06em; }
 .analysis-panel header p { margin: 2px 0 0; font: 400 10px var(--font-body); color: #9a9a9a; }
-.sensor-row { display: flex; flex-direction: column; gap: 6px; font: 400 10px var(--font-body); color: #bbb; animation: fade-up .6s .3s both; }
+.sensor-note { margin: 0; font: 400 10px var(--font-body); color: #bbb; animation: fade-up .6s .3s both; }
 .card { background: #1b1b1b; border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,.06); animation: card-in .7s calc(.35s + var(--i) * 90ms) cubic-bezier(.2,1.5,.4,1) both; }
 .card h3 { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .05em; color: #fff; }
 .card-note { margin: 8px 0 0; font: 400 10px/1.4 var(--font-body); color: #8f8f8f; }

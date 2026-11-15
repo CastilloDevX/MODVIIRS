@@ -5,6 +5,7 @@ import '@fontsource/orbitron/700.css'
 import '@fontsource/prompt/400.css'
 import '@fontsource/prompt/500.css'
 import '@fontsource/prompt/600.css'
+import '@fontsource/prompt/700.css'
 import './index.css'
 import App from './App.tsx'
 
