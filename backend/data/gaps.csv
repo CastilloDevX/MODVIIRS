@@ -1,0 +1,5 @@
+sensor_group,platform,start,end,cause
+VIIRS,Suomi-NPP,2026-05-01,2026-07-27,anomalias S-NPP 2026 (GPS/spacecraft)
+VIIRS,Suomi-NPP,2026-11-02,2099-01-01,cese definitivo S-NPP
+MODIS,Aqua,2024-03-22,2024-03-25,perdida estacion Svalbard
+MODIS,Terra,2026-03-26,2026-03-27,standby Terra

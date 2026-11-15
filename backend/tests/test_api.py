@@ -9,26 +9,26 @@ def client():
 
 
 def test_hello(client):
-    response = client.get("/api/v1/hello")
+    response = client.get("/api/hello")
     assert response.status_code == 200
     assert response.is_json
     assert response.json == {"message": "Hello World"}
 
 
 def test_health(client):
-    response = client.get("/api/v1/health")
+    response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json == {"status": "ok"}
 
 
 def test_missing_route_returns_json(client):
-    response = client.get("/api/v1/missing")
+    response = client.get("/api/missing")
     assert response.status_code == 404
     assert response.json["error"] == "Not Found"
 
 
 def test_method_not_allowed_preserves_allow_header(client):
-    response = client.post("/api/v1/hello")
+    response = client.post("/api/hello")
     assert response.status_code == 405
     assert "GET" in response.headers["Allow"]
     assert response.is_json

@@ -9,6 +9,8 @@ export const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMo
 export const diffDays = (a: Date, b: Date) => Math.round((b.getTime() - a.getTime()) / DAY_MS)
 
 const pad = (n: number) => String(n).padStart(2, '0')
+/** YYYY-MM-DD format for API params. Never use Date.toISOString() — it outputs UTC midnight which shifts the date for users west of UTC. */
+export const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 /** 10/OCT/26 */
 export const formatShort = (d: Date) => `${pad(d.getDate())}/${MONTHS_ABBR[d.getMonth()].toUpperCase()}/${pad(d.getFullYear() % 100)}`
 /** 10/Oct/2026 */

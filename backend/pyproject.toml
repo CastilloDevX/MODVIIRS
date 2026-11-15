@@ -7,10 +7,16 @@ name = "modviirs-backend"
 version = "0.1.0"
 description = "API de MODVIIRS"
 requires-python = ">=3.12"
-dependencies = ["Flask>=3.1,<4", "gunicorn>=23,<24"]
+dependencies = [
+    "Flask>=3.1,<4",
+    "gunicorn>=23,<24",
+    "polars>=1.0",
+    "pyarrow>=10.0",
+    "requests>=2.32",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.14,<1"]
+dev = ["pytest>=8,<10", "ruff>=0.14,<1", "flasgger>=0.9,<1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
