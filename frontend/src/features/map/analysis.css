@@ -1,0 +1,58 @@
+.analysis-panel, .analysis-panel *, .panel-tab, .map-filters, .map-filters *, .hover-chart, .hover-chart * { font-family: var(--font-body) !important; }
+.analysis-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 380px; z-index: 4; overflow-y: auto; overflow-x: hidden; padding: 14px 14px 24px; background: rgba(14,14,14,.94); backdrop-filter: blur(10px); border-left: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 12px; animation: panel-in .85s cubic-bezier(.2,1.4,.35,1) both; transform-origin: right center; }
+.analysis-panel header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; animation: fade-up .6s .2s both; }
+.analysis-panel h2 { margin: 0; font-size: 17px; letter-spacing: .06em; }
+.analysis-panel header p { margin: 2px 0 0; font: 400 10px var(--font-body); color: #9a9a9a; }
+.sensor-note { margin: 0; font: 400 10px var(--font-body); color: #bbb; animation: fade-up .6s .3s both; }
+.card { background: #1b1b1b; border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,.06); animation: card-in .7s calc(.35s + var(--i) * 90ms) cubic-bezier(.2,1.5,.4,1) both; }
+.card h3 { margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .05em; color: #fff; }
+.card-note { margin: 8px 0 0; font: 400 10px/1.4 var(--font-body); color: #8f8f8f; }
+.card-error { margin: 0; font: 400 11px var(--font-body); color: #ffb347; }
+.skeleton { height: 64px; border-radius: 8px; display: grid; place-items: center; font: 400 11px var(--font-body); color: #888; background: linear-gradient(90deg, #202020 25%, #2c2c2c 50%, #202020 75%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kpi { background: #232323; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.kpi-label { font: 400 9px var(--font-body); color: #9a9a9a; }
+.kpi-value { font: 700 15px var(--font-body); color: #ffd54f; overflow-wrap: anywhere; }
+.kpi-value small { font: 400 9px var(--font-body); color: #aaa; margin-left: 2px; }
+.chart-readout { font: 500 10px var(--font-body); color: #ffd54f; min-height: 14px; margin-bottom: 4px; }
+.analysis-panel svg { width: 100%; height: auto; display: block; overflow: visible; }
+.analysis-panel .axis { font: 400 8px var(--font-body); fill: #8f8f8f; }
+.analysis-panel .grid { stroke: rgba(255,255,255,.08); stroke-width: 1; }
+.analysis-panel .cursor { stroke: #fff; stroke-width: 1; stroke-dasharray: 2 2; }
+.analysis-panel .step-band { fill: rgba(255,255,255,.14); }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.4s .6s ease-out forwards; }
+.area-fill { animation: fade-in 1s .8s both; }
+.pop { animation: pop .5s 1.2s cubic-bezier(.2,2,.4,1) both; transform-box: fill-box; transform-origin: center; }
+.heat-cell { animation: pop .45s cubic-bezier(.2,2,.4,1) both; transform-box: fill-box; transform-origin: center; }
+.bar-up { animation: bar-up .6s cubic-bezier(.2,1.6,.4,1) both; transform-box: fill-box; transform-origin: bottom; }
+.donut { display: flex; align-items: center; gap: 10px; }
+.donut svg { width: 76px; flex: none; }
+.donut-seg { animation: fade-in .8s .6s both; }
+.donut ul, .barlist { list-style: none; margin: 0; padding: 0; font: 400 10px var(--font-body); color: #ddd; display: flex; flex-direction: column; gap: 4px; }
+.donut li { display: grid; grid-template-columns: 10px 1fr auto auto; gap: 5px; align-items: center; }
+.donut li i { font-style: normal; color: #8f8f8f; }
+.swatch { width: 8px; height: 8px; border-radius: 50%; display: block; }
+.duo { display: flex; flex-direction: column; gap: 10px; }
+.barlist li { display: grid; grid-template-columns: 70px 1fr auto; gap: 8px; align-items: center; }
+.barlist li > div { background: #262626; border-radius: 4px; height: 8px; overflow: hidden; }
+.bar-grow { display: block; height: 100%; border-radius: 4px; transform-origin: left; animation: grow-x .8s cubic-bezier(.2,1.3,.4,1) both; }
+.panel-foot { margin: 0; font: 400 9px/1.4 var(--font-body); color: #777; }
+.panel-tab { position: absolute; right: 0; top: 50%; z-index: 4; transform: translateY(-50%); background: #fff; color: #111; border: 0; border-radius: 8px 0 0 8px; padding: 14px 6px; writing-mode: vertical-rl; font: 700 11px var(--font-body); cursor: pointer; animation: pop .5s both; }
+
+/* The panel overlays the map: shift the map's own corner controls out from under it. */
+.map-area.has-panel .maplibregl-ctrl-top-right { right: 380px; }
+.map-area.has-panel .maplibregl-ctrl-bottom-right { right: 380px; }
+.map-area.has-panel .map-coords { right: 394px; }
+.map-area.has-panel .fire-truncated { right: 430px; }
+
+@keyframes panel-in { 0% { transform: translateX(110%) scale(.94) rotate(1.5deg); opacity: 0; } 55% { transform: translateX(-3%) scale(1.01); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes card-in { 0% { transform: translateY(40px) scale(.85); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes fade-up { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes bar-up { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .analysis-panel, .analysis-panel *, .panel-tab { animation: none !important; } .draw { stroke-dashoffset: 0; } }
+@media (max-width: 900px) { .analysis-panel { position: static; width: auto; } }

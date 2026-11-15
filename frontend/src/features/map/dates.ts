@@ -23,15 +23,46 @@ export function monthGrid(year: number, month: number): Date[] {
   return Array.from({ length: 42 }, (_, i) => new Date(year, month, 1 - offset + i))
 }
 
-/** Nearest allowed position: a multiple of the step, or the final day. */
-export function snapOffset(raw: number, step: number, days: number) {
-  const clamped = Math.min(Math.max(raw, 0), days)
-  const multiple = Math.round(clamped / step) * step
-  return Math.abs(days - clamped) < Math.abs(multiple - clamped) ? days : Math.min(multiple, days)
+export type StepUnit = 'day' | 'week' | 'month' | 'year'
+export const STEP_UNITS: { id: StepUnit; label: string }[] = [
+  { id: 'day', label: 'Días' }, { id: 'week', label: 'Semanas' }, { id: 'month', label: 'Meses' }, { id: 'year', label: 'Años' },
+]
+
+/** Adds k units to a date; month/year steps keep the day of month, clamped to the shorter month. */
+export function addUnits(d: Date, unit: StepUnit, k: number): Date {
+  if (unit === 'day') return addDays(d, k)
+  if (unit === 'week') return addDays(d, 7 * k)
+  const months = unit === 'month' ? k : 12 * k
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + months + 1, 0).getDate()
+  return new Date(d.getFullYear(), d.getMonth() + months, Math.min(d.getDate(), lastDay))
 }
 
+/** Day offsets (from start) where each step begins: 0, n units, 2n units... up to the end date. */
+export function stepStops(start: Date, end: Date, unit: StepUnit, n: number): number[] {
+  const days = diffDays(start, end)
+  const stops: number[] = []
+  for (let k = 0; ; k++) {
+    const offset = diffDays(start, addUnits(start, unit, k * n))
+    if (offset > days) break
+    stops.push(offset)
+  }
+  return stops
+}
 
-/** NASA imagery used here starts in 2000: earlier dates cannot be selected. */
-export const MIN_DATE = new Date(2000, 0, 1)
+/** Nearest step start, or the final day. */
+export function snapToStops(raw: number, stops: number[], days: number) {
+  const clamped = Math.min(Math.max(raw, 0), days)
+  return [...stops, days].reduce((best, s) => (Math.abs(s - clamped) < Math.abs(best - clamped) ? s : best), 0)
+}
+
+/** Last day offset (inclusive) covered by the step that starts at `offset`. */
+export function stepEnd(offset: number, stops: number[], days: number) {
+  const next = stops.find(s => s > offset)
+  return next === undefined ? days : next - 1
+}
+
+/** The hotspot dataset covers 2000-11-01 to 2025-12-31: dates outside cannot be selected. */
+export const MIN_DATE = new Date(2000, 10, 1)
+export const MAX_DATE = new Date(2025, 11, 31)
 export const MIN_MONTH = MIN_DATE
-export const MAX_MONTH = new Date(new Date().getFullYear(), 11, 31)
+export const MAX_MONTH = MAX_DATE

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -6,6 +6,7 @@ import { COUNTRIES_URL, COUNTRY_SELECTION, EMPTY, dimmedWorld, type Country, typ
 import { BASEMAPS, LANDSAT, OVERLAYS, gibsTiles } from './layers'
 import { bboxOf, dimOutside, outlineOf, type Bbox, type LngLat } from './region'
 import type { FirePoint } from '../../lib/types'
+import { intensityOf, phaseOf, type PhaseId } from './hotspots'
 
 /** 3D = globe with atmosphere; 2D = flat Mercator map, north up, no tilt. */
 function applyMode(map: maplibregl.Map, mode: ViewMode) {
@@ -29,6 +30,13 @@ type Props = {
   picking: boolean; onPickingChange: (p: boolean) => void
   region: Bbox | null; onRegionChange: (r: Bbox | null) => void
   points: FirePoint[] | null; truncated: boolean
+  /** Extra controls shown next to the 3D/2D buttons. */
+  controls?: ReactNode
+  /** Panel shown in the top-left corner of the map (hotspot filters). */
+  filters?: ReactNode
+  visiblePhases: PhaseId[]
+  /** Results panel overlaid on the right of the map. */
+  panel?: ReactNode
 }
 
 /** While picking the planet is dark; the box between the first corner and the pointer stays lit. */
@@ -46,15 +54,16 @@ function showSelection(map: maplibregl.Map, countries: CountryFeature[], id: str
   ;(map.getSource('outline') as maplibregl.GeoJSONSource | undefined)?.setData(country ?? EMPTY)
 }
 
-export function MapView({ basemap, mode, onModeChange, selected, onSelect, picking, onPickingChange, region, onRegionChange, points, truncated }: Props) {
+export function MapView({ basemap, mode, onModeChange, selected, onSelect, picking, onPickingChange, region, onRegionChange, points, truncated, controls, filters, visiblePhases, panel }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const countriesRef = useRef<CountryFeature[]>([])
+  const coordsRef = useRef<HTMLSpanElement>(null)
   const cornerRef = useRef<LngLat | null>(null)
   const dragStartRef = useRef<{ lngLat: LngLat; x: number; y: number } | null>(null)
   const dragActiveRef = useRef(false)
-  const current = useRef({ basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange })
-  useEffect(() => { current.current = { basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange } })
+  const current = useRef({ basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange, hasPanel: !!panel })
+  useEffect(() => { current.current = { basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange, hasPanel: !!panel } })
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -101,9 +110,10 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
       map.addLayer({
         id: 'fire-circles', type: 'circle', source: 'fire-points',
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['get', 'frp'], 0, 3, 50, 5, 200, 9, 500, 13],
-          'circle-color': ['interpolate', ['linear'], ['get', 'frp'], 0, '#ffe066', 100, '#ff6600', 500, '#8b0000'],
-          'circle-opacity': ['case', ['==', ['get', 'conf_class'], 'high'], 1.0, 0.65],
+          'circle-radius': ['interpolate', ['linear'], ['get', 'intensity'], 0, 3, 0.4, 5, 0.7, 8, 1, 12],
+          'circle-color': ['interpolate', ['linear'], ['get', 'intensity'],
+            0, '#fff59d', 0.39, '#ffd600', 0.4, '#ffa726', 0.69, '#ff6d00', 0.7, '#ff3d00', 1, '#b71c1c'],
+          'circle-opacity': ['case', ['==', ['get', 'conf_class'], 'high'], 1.0, 0.7],
         },
       })
       map.addLayer({
@@ -179,6 +189,23 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
 
   useEffect(() => {
     const map = mapRef.current
+    if (!map?.getLayer('fire-circles')) return
+    const phase: maplibregl.ExpressionSpecification = ['in', ['get', 'phase'], ['literal', visiblePhases]]
+    map.setFilter('fire-circles', phase)
+    map.setFilter('fire-circles-persistent', ['all', phase, ['==', ['get', 'is_persistent'], true]])
+  }, [visiblePhases, points])
+
+  // Autozoom: when a region is set the camera flies to it. Starting or clearing a selection never moves the camera.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (region) {
+      map.fitBounds([[region.west, region.south], [region.east, region.north]], { padding: { top: 40, bottom: 110, left: 40, right: current.current.hasPanel ? 420 : 60 }, duration: 1800, maxZoom: BASEMAPS[0].maxMapZoom })
+    }
+  }, [region])
+
+  useEffect(() => {
+    const map = mapRef.current
     const src = map?.getSource('fire-points') as maplibregl.GeoJSONSource | undefined
     if (!src) return
     src.setData({
@@ -186,13 +213,22 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
       features: (points ?? []).map(p => ({
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [p.longitude, p.latitude] },
-        properties: { frp: p.frp, conf_class: p.conf_class, is_persistent: p.is_persistent },
+        properties: { frp: p.frp, intensity: intensityOf(p), phase: phaseOf(intensityOf(p)), conf_class: p.conf_class, is_persistent: p.is_persistent },
       })),
     })
   }, [points])
 
   return (
-    <div className="map-area">
+    <div className={`map-area${panel ? ' has-panel' : ''}`} onPointerMove={e => {
+      const map = mapRef.current
+      const el = coordsRef.current
+      if (!map || !el) return
+      const rect = e.currentTarget.getBoundingClientRect()
+      const { lng, lat } = map.unproject([e.clientX - rect.left, e.clientY - rect.top])
+      el.textContent = Number.isFinite(lng) && Number.isFinite(lat) && Math.abs(lat) <= 90
+        ? `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'} · ${Math.abs(((lng + 540) % 360) - 180).toFixed(4)}° ${((lng + 540) % 360) - 180 >= 0 ? 'E' : 'W'}`
+        : '—'
+    }}>
       <div ref={hostRef} className="map-canvas" role="application" aria-label="Mapa interactivo de la Tierra: arrastra para girar, rueda para acercar" />
       {picking && (
         <div
@@ -233,11 +269,20 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
           }}
         />
       )}
-      <ToggleGroup variant="outline" className="mode-toggle" value={[mode]} aria-label="Modo de vista"
-        onValueChange={v => { if (v[0]) onModeChange(v[0] as ViewMode) }}>
-        <ToggleGroupItem value="3d">3D</ToggleGroupItem>
-        <ToggleGroupItem value="2d">2D</ToggleGroupItem>
-      </ToggleGroup>
+      {panel}
+      {filters && <div className="map-filters">{filters}</div>}
+      <div className="map-controls">
+        <div className="control-group">
+          <ToggleGroup variant="outline" value={[mode]} aria-label="Modo de vista"
+            onValueChange={v => { if (v[0]) onModeChange(v[0] as ViewMode) }}>
+            <ToggleGroupItem value="3d">3D</ToggleGroupItem>
+            <ToggleGroupItem value="2d">2D</ToggleGroupItem>
+          </ToggleGroup>
+          <span className="caption">Vista del mapa: globo 3D o mapa plano 2D</span>
+        </div>
+        {controls}
+      </div>
+      <span ref={coordsRef} className="map-coords" aria-label="Latitud y longitud del puntero">—</span>
       {truncated && (
         <div className="fire-truncated" role="status">Showing first 50,000 detections · use CSV export for full data</div>
       )}

@@ -8,7 +8,7 @@ export default function App() {
   return (
     <Suspense fallback={<p role="status" style={{ padding: 24 }}>Cargando…</p>}>
       <Routes>
-        <Route path="/" element={<h1 className="title">Hola mundo</h1>} />
+        <Route path="/" element={<MapPage />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="*" element={<h1 className="title">404</h1>} />

@@ -1,0 +1,282 @@
+{
+  "descripcion": "Walk-forward H1 por pais (entrena con anios < anio de prueba). Zonas de 1 grado, VIIRS armonizado (Alexis), sin clima.",
+  "anios_prueba": [
+    2023,
+    2024,
+    2025
+  ],
+  "por_pais_anio": [
+    {
+      "pais": "Angola",
+      "anio": 2023,
+      "n": 7124,
+      "anomalias": 624,
+      "auc": 0.855,
+      "ap": 0.4113,
+      "brier": 0.0651,
+      "auc_base": 0.5483,
+      "ap_base": 0.1025,
+      "brier_base": 0.1049
+    },
+    {
+      "pais": "Angola",
+      "anio": 2024,
+      "n": 7261,
+      "anomalias": 793,
+      "auc": 0.8361,
+      "ap": 0.4905,
+      "brier": 0.0756,
+      "auc_base": 0.5504,
+      "ap_base": 0.1267,
+      "brier_base": 0.1152
+    },
+    {
+      "pais": "Angola",
+      "anio": 2025,
+      "n": 6987,
+      "anomalias": 379,
+      "auc": 0.8133,
+      "ap": 0.2234,
+      "brier": 0.0469,
+      "auc_base": 0.5627,
+      "ap_base": 0.0641,
+      "brier_base": 0.0701
+    },
+    {
+      "pais": "Australia",
+      "anio": 2023,
+      "n": 39104,
+      "anomalias": 3531,
+      "auc": 0.8471,
+      "ap": 0.4418,
+      "brier": 0.0649,
+      "auc_base": 0.556,
+      "ap_base": 0.1086,
+      "brier_base": 0.1038
+    },
+    {
+      "pais": "Australia",
+      "anio": 2024,
+      "n": 39856,
+      "anomalias": 2387,
+      "auc": 0.8527,
+      "ap": 0.322,
+      "brier": 0.0473,
+      "auc_base": 0.5966,
+      "ap_base": 0.0831,
+      "brier_base": 0.0723
+    },
+    {
+      "pais": "Australia",
+      "anio": 2025,
+      "n": 38352,
+      "anomalias": 2677,
+      "auc": 0.835,
+      "ap": 0.343,
+      "brier": 0.0547,
+      "auc_base": 0.5862,
+      "ap_base": 0.0922,
+      "brier_base": 0.0762
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2023,
+      "n": 40456,
+      "anomalias": 4910,
+      "auc": 0.8235,
+      "ap": 0.3897,
+      "brier": 0.0891,
+      "auc_base": 0.5408,
+      "ap_base": 0.133,
+      "brier_base": 0.1611
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2024,
+      "n": 41234,
+      "anomalias": 3478,
+      "auc": 0.8089,
+      "ap": 0.3137,
+      "brier": 0.0673,
+      "auc_base": 0.5253,
+      "ap_base": 0.0877,
+      "brier_base": 0.1175
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2025,
+      "n": 39678,
+      "anomalias": 1806,
+      "auc": 0.8247,
+      "ap": 0.2278,
+      "brier": 0.0394,
+      "auc_base": 0.5904,
+      "ap_base": 0.0609,
+      "brier_base": 0.0712
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2023,
+      "n": 12220,
+      "anomalias": 1136,
+      "auc": 0.7182,
+      "ap": 0.1975,
+      "brier": 0.0801,
+      "auc_base": 0.5292,
+      "ap_base": 0.0998,
+      "brier_base": 0.1232
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2024,
+      "n": 12455,
+      "anomalias": 1494,
+      "auc": 0.7154,
+      "ap": 0.2622,
+      "brier": 0.0984,
+      "auc_base": 0.514,
+      "ap_base": 0.1233,
+      "brier_base": 0.1343
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2025,
+      "n": 11985,
+      "anomalias": 947,
+      "auc": 0.7235,
+      "ap": 0.2286,
+      "brier": 0.0681,
+      "auc_base": 0.5509,
+      "ap_base": 0.0899,
+      "brier_base": 0.0923
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2023,
+      "n": 12116,
+      "anomalias": 1050,
+      "auc": 0.8409,
+      "ap": 0.3349,
+      "brier": 0.0668,
+      "auc_base": 0.5264,
+      "ap_base": 0.0936,
+      "brier_base": 0.1255
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2024,
+      "n": 12349,
+      "anomalias": 649,
+      "auc": 0.8472,
+      "ap": 0.3051,
+      "brier": 0.0425,
+      "auc_base": 0.5468,
+      "ap_base": 0.0586,
+      "brier_base": 0.0785
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2025,
+      "n": 11883,
+      "anomalias": 729,
+      "auc": 0.8494,
+      "ap": 0.3425,
+      "brier": 0.0481,
+      "auc_base": 0.5853,
+      "ap_base": 0.0855,
+      "brier_base": 0.0711
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2023,
+      "n": 123916,
+      "anomalias": 3691,
+      "auc": 0.9306,
+      "ap": 0.3939,
+      "brier": 0.0218,
+      "auc_base": 0.6,
+      "ap_base": 0.0597,
+      "brier_base": 0.0381
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2024,
+      "n": 126299,
+      "anomalias": 3593,
+      "auc": 0.9453,
+      "ap": 0.4787,
+      "brier": 0.0191,
+      "auc_base": 0.5967,
+      "ap_base": 0.0503,
+      "brier_base": 0.0347
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2025,
+      "n": 121533,
+      "anomalias": 2678,
+      "auc": 0.9335,
+      "ap": 0.4333,
+      "brier": 0.0158,
+      "auc_base": 0.633,
+      "ap_base": 0.0541,
+      "brier_base": 0.0267
+    }
+  ],
+  "por_pais": [
+    {
+      "pais": "Angola",
+      "auc": 0.8348,
+      "ap": 0.3751,
+      "brier": 0.0625,
+      "auc_base": 0.5538,
+      "ap_base": 0.0978,
+      "brier_base": 0.0967
+    },
+    {
+      "pais": "Australia",
+      "auc": 0.8449,
+      "ap": 0.3689,
+      "brier": 0.0556,
+      "auc_base": 0.5796,
+      "ap_base": 0.0946,
+      "brier_base": 0.0841
+    },
+    {
+      "pais": "Brazil",
+      "auc": 0.819,
+      "ap": 0.3104,
+      "brier": 0.0653,
+      "auc_base": 0.5522,
+      "ap_base": 0.0939,
+      "brier_base": 0.1166
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "auc": 0.719,
+      "ap": 0.2295,
+      "brier": 0.0822,
+      "auc_base": 0.5314,
+      "ap_base": 0.1044,
+      "brier_base": 0.1166
+    },
+    {
+      "pais": "Mexico",
+      "auc": 0.8458,
+      "ap": 0.3275,
+      "brier": 0.0525,
+      "auc_base": 0.5528,
+      "ap_base": 0.0792,
+      "brier_base": 0.0917
+    },
+    {
+      "pais": "Russian_Federation",
+      "auc": 0.9365,
+      "ap": 0.4353,
+      "brier": 0.0189,
+      "auc_base": 0.6099,
+      "ap_base": 0.0547,
+      "brier_base": 0.0332
+    }
+  ]
+}

@@ -48,7 +48,9 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: #000; }
-h1, h2, h3, .title { font-family: var(--font-title); }
+/* Orbitron is only for the page title; everything else is Prompt. */
+h1, .title { font-family: var(--font-title); }
+h2, h3 { font-family: var(--font-body); }
 :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 @theme inline {
