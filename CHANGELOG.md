@@ -4,7 +4,10 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ## Sin publicar
 
-_(Pendiente de publicación.)_
+### Frontend
+
+- Selección de región (campo «Region» sobre «Imagery»): el botón Select oscurece el planeta; un clic/toque fija la primera esquina y otro la opuesta. Entre ambos, el rectángulo se ilumina y sigue al cursor; el resto queda oscuro. Mover el mapa con arrastre no cuenta como clic. Esc o Cancel cancelan; × borra la región. Guarda el cuadro como norte/sur/este/oeste (no cruza el antimeridiano); aún no muestra focos.
+- Selección de países (polígonos Natural Earth 1:50m, `frontend/public/data/countries.geojson`) queda aparcada tras `COUNTRY_SELECTION = false` en `countries.ts`.
 
 ## 0.2.0 — 2026-11-14
 
