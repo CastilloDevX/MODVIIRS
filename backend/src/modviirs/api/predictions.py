@@ -177,9 +177,7 @@ def get_global_week(semana: str):
       404: {description: "No forecast for that week (available 2023-2025)"}
     """
     _global_o_503()
-    data = glob.get_week(
-        current_app.config, semana, _bbox(), int(request.args.get("horizonte", 1))
-    )
+    data = glob.get_week(current_app.config, semana, _bbox(), int(request.args.get("horizonte", 1)))
     if data is None:
         abort(404, description=f"No hay prediccion global para la semana {semana}.")
     return jsonify(data)
