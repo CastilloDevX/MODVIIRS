@@ -11,7 +11,8 @@ import type { Bbox } from './region'
 import { MapView, type ViewMode } from './MapView'
 import { RangeCalendar } from './RangeCalendar'
 import { Timeline } from './Timeline'
-import { diffDays, snapOffset } from './dates'
+import { addDays, diffDays, isoDate, snapOffset } from './dates'
+import { useFiresPoints } from '../../lib/hooks/useFiresPoints'
 import './map.css'
 
 const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? pos : neg}`
@@ -26,6 +27,10 @@ export function MapPage() {
   const [region, setRegion] = useState<Bbox | null>(null)
   const [mode, setMode] = useState<ViewMode>('3d')
   const days = diffDays(range.start, range.end)
+
+  const windowStart = isoDate(addDays(range.start, offset))
+  const windowEnd = isoDate(addDays(range.start, Math.min(offset + stepDays - 1, days)))
+  const { data: pointsResponse } = useFiresPoints(region, windowStart, windowEnd, {})
 
   const changeRange = (start: Date, end: Date) => { setRange({ start, end }); setOffset(0); setStepDays(s => Math.min(s, Math.max(diffDays(start, end), 1))) }
   const changeStep = (n: number) => { setStepDays(n); setOffset(o => snapOffset(o, n, days)) }
@@ -80,7 +85,8 @@ export function MapPage() {
       </aside>
       <main className="stage">
         <MapView basemap={basemap} mode={mode} onModeChange={setMode} selected={country?.id ?? null} onSelect={setCountry}
-          picking={picking} onPickingChange={setPicking} region={region} onRegionChange={setRegion} />
+          picking={picking} onPickingChange={setPicking} region={region} onRegionChange={setRegion}
+          points={pointsResponse?.data ?? null} truncated={pointsResponse?.truncated ?? false} />
         <Timeline start={range.start} end={range.end} offset={offset} stepDays={stepDays} onOffsetChange={setOffset} />
       </main>
     </div>
