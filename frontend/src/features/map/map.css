@@ -15,7 +15,18 @@
 .country-field button:hover { color: #fff; }
 .map-area { flex: 1; min-height: 0; position: relative; }
 .map-canvas { position: absolute; inset: 0; }
-.mode-toggle { position: absolute; left: 12px; bottom: 12px; z-index: 1; background: rgba(20,20,20,.85); }
+.map-controls { position: absolute; left: 12px; bottom: 12px; z-index: 3; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 40px; }
+.control-group { display: flex; flex-direction: column; gap: 5px; max-width: 260px; }
+.control-group [data-slot=toggle-group] { background: rgba(20,20,20,.85); }
+.scale-group { max-width: none; padding-left: 40px; border-left: 1px solid rgba(255,255,255,.35); }
+.caption { font: 400 10px var(--font-body); color: #d0d0d0; text-shadow: 0 0 4px #000, 0 0 2px #000; }
+.map-filters { position: absolute; left: 12px; top: 12px; z-index: 3; width: 210px; display: flex; flex-direction: column; gap: 8px; background: rgba(20,20,20,.88); border-radius: 10px; padding: 12px; }
+.map-filters [data-slot=toggle-group] { width: 100%; }
+.phase-item { width: 100%; justify-content: flex-start; gap: 8px; }
+.phase-item[aria-pressed="false"] { opacity: .45; }
+.phase-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.phase-range { color: #9a9a9a; font-size: 10px; }
+.phase-count { margin-left: auto; font-size: 10px; color: #ddd; }
 .timeline { background: #141414; padding: 6px 28px 6px; }
 .track { position: relative; height: 20px; cursor: grab; touch-action: none; user-select: none; margin: 24px 8px 0; border-bottom: 1px solid #5a5a5a; }
 .track.dragging, .track.dragging .thumb { cursor: grabbing; }
@@ -47,3 +58,26 @@
 .sidebar .region-button[aria-pressed="true"] { background: #fff; color: #111; }
 .fire-truncated { position: absolute; top: 10px; right: 50px; z-index: 1; background: rgba(20,20,20,.85); color: #ffb347; font: 500 11px var(--font-body); padding: 4px 10px; border-radius: 6px; pointer-events: none; }
 .picker-overlay { position: absolute; inset: 0; cursor: crosshair; z-index: 2; }
+
+.map-coords { position: absolute; right: 14px; bottom: 38px; z-index: 3; font: 400 9px var(--font-body); color: #ddd; text-shadow: 0 0 4px #000, 0 0 2px #000; pointer-events: none; }
+
+.timeline { position: relative; }
+.hover-chart { position: absolute; left: 36px; right: 36px; bottom: 100%; height: 120px; z-index: 5; pointer-events: none; opacity: 0; transform: translateY(14px) scaleY(.92); transform-origin: bottom; transition: opacity .2s, transform .25s cubic-bezier(.2,1.4,.4,1); background: linear-gradient(to top, rgba(20,20,20,.55), transparent); border-bottom: 1px solid rgba(255,255,255,.25); }
+.hover-chart.show { opacity: 1; transform: none; }
+.hover-chart svg { width: 100%; height: 100%; display: block; }
+.hc-line { position: absolute; top: 0; bottom: 0; width: 1px; background: #fff; }
+.hc-dot { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255,213,79,.5); }
+.hc-peak { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,.35); }
+.hc-peak em { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 600 10px var(--font-body); font-style: normal; color: #fff; background: #e53935; padding: 1px 6px; border-radius: 4px; }
+.hc-tip { position: absolute; top: -2px; transform: translate(-50%, -100%); white-space: nowrap; font: 600 10px var(--font-body); color: #111; background: #fff; padding: 2px 7px; border-radius: 4px; }
+
+.sidebar .export-button { background: #fff; color: #111; border-color: #fff; font-weight: 600; }
+.sidebar .export-button:hover { background: #e8e8e8; color: #111; }
+.range-calendar td.day-yellow button { background: #ffd600 !important; color: #111 !important; }
+.range-calendar td.day-orange button { background: #ff8f00 !important; color: #111 !important; }
+.range-calendar td.day-red button { background: #e53935 !important; color: #fff !important; }
+.range-calendar td[class*="day-"] button[data-range-start="true"], .range-calendar td[class*="day-"] button[data-range-end="true"] { box-shadow: inset 0 0 0 2px #fff; }
+.day-legend { list-style: none; margin: -4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font: 400 10px var(--font-body); color: #ddd; }
+.day-legend li { display: flex; align-items: center; gap: 5px; }
+.day-legend li span { width: 10px; height: 10px; border-radius: 3px; display: block; }
+.day-legend-note { flex-basis: 100%; color: #8f8f8f; }

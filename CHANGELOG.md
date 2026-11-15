@@ -4,8 +4,28 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ## Sin publicar
 
+### Backend
+
+- `queries.py`: si `activity_daily.parquet` / `activity_grid.parquet` son punteros de Git LFS (sin `git lfs pull`), se regeneran desde `hotspots_harmonized.parquet` en `backend/data/.derived/` (ignorado por Git, un parquet por año y sensor, unos 45 s la primera vez). Corrige los errores 500 de `/fires/timeline`, `/calendar` y `/medians`.
+- `/fires/points.csv`: se genera en streaming a un archivo temporal (no en memoria) y ya no incluye la columna `sensor_group` (MODIS/VIIRS).
+- `aoi_calendar` ahora lee la actividad de forma perezosa (antes cargaba el parquet entero en memoria).
+
 ### Frontend
 
+- La página principal es ahora `/`; la ruta `/map` ya no existe (da 404). Se retiró el «Hola mundo».
+- Calendario principal: cada día con hotspots se pinta amarillo, naranja o rojo según su intensidad (conteo diario en escala log frente al día pico de la región; 0–0.4, 0.4–0.7, 0.7–1), con leyenda. Inicio y fin del rango llevan borde blanco.
+- Botón blanco «Export CSV» en la barra izquierda: descarga las detecciones de la región para el rango de fechas completo seleccionado.
+- `/map`: el botón Region va arriba del todo; calendario, fechas, pasos y línea de tiempo aparecen solo cuando hay una región. Se quitó el selector Imagery (solo el dataset diurno de la Tierra).
+- Escala de pasos (Días, Semanas, Meses, Años) junto a los botones 3D/2D; el campo Steps indica cuántas unidades. La línea de tiempo salta entre inicios de paso y los hotspots (`/api/fires/points`) mostrados son los del paso actual.
+- Autozoom: al fijar la región la cámara vuela hasta ella y la encuadra. Pulsar Select o borrar la región nunca mueve la cámara.
+- Por defecto: rango 1/dic/2012 – 31/dic/2025 y escala de meses; se quitó el campo Steps (cada paso es 1 unidad de la escala).
+- Coordenadas (latitud/longitud) del puntero en la esquina inferior derecha del mapa.
+- Filtros de hotspots (esquina superior izquierda del mapa): intensidad normalizada 0–1 (FRP en escala logarítmica, tope 500 MW) en tres fases: amarillos 0–0.4, naranjas 0.4–0.7, rojos 0.7–1, con contador y activables por fase.
+- Texto bajo los botones 3D/2D y Días/Semanas/Meses/Años explicando su función, con separación visible entre ambos grupos.
+- Tipografía: Orbitron solo en el título de página; paneles, títulos y números usan Prompt.
+- Panel de análisis a la derecha (aparece con animación al fijar la región; se oculta/reabre): resumen del rango (hotspots, días con fuego, día pico, media diaria, FRP total, celdas activas), series diarias de hotspots y FRP, estadísticas del paso actual (FRP media/mediana/P90/máx./suma, % confianza alta, persistentes, FRP ≥ 15 MW), histograma de FRP, día/noche, confianza, satélites, calendario mensual de anomalías (z-score) y estacionalidad típica. Selector de sensor VIIRS/MODIS para serie, calendario y estacionalidad.
+- Línea de tiempo: al pasar el mouse aparece un polígono de hotspots por día a todo lo ancho, con el pico marcado y el día bajo el cursor.
+- Fechas seleccionables limitadas a la cobertura del dataset de hotspots: 2000-11-01 a 2025-12-31.
 - Selección de región (campo «Region» sobre «Imagery»): el botón Select oscurece el planeta; un clic/toque fija la primera esquina y otro la opuesta. Entre ambos, el rectángulo se ilumina y sigue al cursor; el resto queda oscuro. Mover el mapa con arrastre no cuenta como clic. Esc o Cancel cancelan; × borra la región. Guarda el cuadro como norte/sur/este/oeste (no cruza el antimeridiano); aún no muestra focos.
 - Selección de países (polígonos Natural Earth 1:50m, `frontend/public/data/countries.geojson`) queda aparcada tras `COUNTRY_SELECTION = false` en `countries.ts`.
 
