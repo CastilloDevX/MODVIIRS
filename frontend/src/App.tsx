@@ -1,17 +1,12 @@
-import { HelloPanel } from './features/hello/HelloPanel'
-import './App.css'
+import { Route, Routes } from 'react-router-dom'
+import { MapPage } from './features/map/MapPage'
 
 export default function App() {
   return (
-    <div className="shell">
-      <header><a className="brand" href="/">MODVIIRS<span>Workspace</span></a><span className="environment">Desarrollo</span></header>
-      <main>
-        <p className="eyebrow">CONEXIÓN CON LA API</p>
-        <h1>Un comienzo conectado.</h1>
-        <p className="intro">Tu espacio de trabajo con React y Flask.</p>
-        <HelloPanel />
-      </main>
-      <footer>MODVIIRS <span>Base del proyecto · v0.1.0</span></footer>
-    </div>
+    <Routes>
+      <Route path="/" element={<h1 className="title">Hola mundo</h1>} />
+      <Route path="/map" element={<MapPage />} />
+      <Route path="*" element={<h1 className="title">404</h1>} />
+    </Routes>
   )
 }
