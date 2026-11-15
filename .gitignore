@@ -17,3 +17,4 @@ coverage/
 backend/data/hotspots_harmonized.parquet
 backend/data/*.nc
 backend/data/*.hdf
+backend/data/prediccion/cache/

@@ -6,9 +6,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { DateField } from './DateField'
 import { BASEMAPS } from './layers'
 import { MapView, type ViewMode } from './MapView'
+import { PredictionPanel } from './PredictionPanel'
+import { usePrediction, type ForecastView } from './usePrediction'
 import { RangeCalendar } from './RangeCalendar'
 import { Timeline } from './Timeline'
-import { diffDays, snapOffset } from './dates'
+import { addDays, diffDays, snapOffset } from './dates'
 import './map.css'
 
 export function MapPage() {
@@ -18,6 +20,9 @@ export function MapPage() {
   const [basemap, setBasemap] = useState(BASEMAPS[0].id)
   const [mode, setMode] = useState<ViewMode>('3d')
   const days = diffDays(range.start, range.end)
+  const [forecastView, setForecastView] = useState<ForecastView>('timeline')
+  const [focus, setFocus] = useState(0)
+  const forecast = usePrediction(addDays(range.start, offset), forecastView)
 
   const changeRange = (start: Date, end: Date) => { setRange({ start, end }); setOffset(0); setStepDays(s => Math.min(s, Math.max(diffDays(start, end), 1))) }
   const changeStep = (n: number) => { setStepDays(n); setOffset(o => snapOffset(o, n, days)) }
@@ -44,9 +49,11 @@ export function MapPage() {
             {BASEMAPS.map(b => <ToggleGroupItem key={b.id} value={b.id} className="flex-1">{b.label}</ToggleGroupItem>)}
           </ToggleGroup>
         </div>
+        <PredictionPanel view={forecastView} onViewChange={setForecastView} live={forecast.live} shown={forecast.shown}
+          monday={forecast.monday} loading={forecast.loading} onFocus={() => setFocus(f => f + 1)} />
       </aside>
       <main className="stage">
-        <MapView basemap={basemap} mode={mode} onModeChange={setMode} />
+        <MapView basemap={basemap} mode={mode} onModeChange={setMode} prediction={forecast.shown} focusPeninsula={focus} />
         <Timeline start={range.start} end={range.end} offset={offset} stepDays={stepDays} onOffsetChange={setOffset} />
       </main>
     </div>
