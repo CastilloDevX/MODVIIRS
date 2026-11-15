@@ -30,6 +30,76 @@ SOURCES_VIIRS_NRT = ["VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"]
 API_MAX_DAYS = 5
 
 
+# --- capas de actividad: usar el parquet del repo (Git LFS) o derivarlo de los puntos ---
+
+_DERIVED_DIR = _DATA_DIR / ".derived"
+
+
+def _is_lfs_pointer(path: Path) -> bool:
+    """True si el archivo es un puntero de Git LFS (falta `git lfs pull`)."""
+    try:
+        if path.stat().st_size > 1024:
+            return False
+        return path.read_bytes().startswith(b"version https://git-lfs")
+    except OSError:
+        return False
+
+
+def _build_derived(name: str, target: Path) -> None:
+    """Regenera activity_daily/activity_grid desde hotspots_harmonized.parquet
+    (sin fuentes persistentes), con el mismo esquema que el pipeline de armonización.
+    `target` es un directorio con un parquet por año y sensor: el archivo de puntos pesa
+    ~2.9 GB y agrupar todo de golpe agota la memoria. Es reanudable.
+    """
+    if name not in ("activity_daily.parquet", "activity_grid.parquet"):
+        raise ValueError(name)
+    src = pl.scan_parquet(_DATA_DIR / "hotspots_harmonized.parquet")
+    combos = _collect(src.select(["year", "sensor_group"]).unique())
+    combos = combos.sort(["year", "sensor_group"]).rows()
+    target.mkdir(parents=True, exist_ok=True)
+    for year, sensor in combos:
+        part = target / f"{year}_{sensor}.parquet"
+        if part.exists():
+            continue
+        hot = (
+            src.filter(
+                (pl.col("year") == year)
+                & (pl.col("sensor_group") == sensor)
+                & ~pl.col("is_persistent")
+            )
+            .select(["cy", "cx", "acq_date_d", "year", "month", "sensor_group", "country", "frp"])
+        )
+        if name == "activity_daily.parquet":
+            lf = hot.group_by(["cy", "cx", "acq_date_d", "sensor_group", "country"]).agg(
+                pl.len().alias("n_hotspots"), pl.col("frp").sum().alias("frp_sum")
+            )
+        else:
+            lf = hot.group_by(["cy", "cx", "year", "month", "sensor_group", "country"]).agg(
+                pl.len().alias("count"),
+                pl.col("acq_date_d").n_unique().alias("active_fire_days"),
+                pl.col("frp").sum().alias("frp_sum"),
+                pl.col("frp").mean().alias("frp_mean"),
+            ).with_columns(
+                ((pl.col("cy") + 0.5) * GRID_DEG).alias("cell_lat"),
+                ((pl.col("cx") + 0.5) * GRID_DEG).alias("cell_lon"),
+            )
+        tmp = part.with_suffix(".tmp")
+        _collect(lf).write_parquet(tmp)
+        tmp.replace(part)
+    (target / "_SUCCESS").touch()
+
+
+def _activity_path(name: str):
+    """Ruta del parquet de actividad: el del repo o, si es un puntero LFS, las partes derivadas."""
+    path = _DATA_DIR / name
+    if not _is_lfs_pointer(path):
+        return path
+    derived = _DERIVED_DIR / path.stem
+    if not (derived / "_SUCCESS").exists():
+        _build_derived(name, derived)
+    return str(derived / "*.parquet")
+
+
 # --- helpers (de harmonize_firms.py) ---
 
 def _collect(lf):
@@ -77,12 +147,15 @@ def aoi_calendar(lat_min, lat_max, lon_min, lon_max, sensor_group, baseline=None
     Los meses de hueco conocido (EXCLUDE_YM) salen con valid=False, z/pctl nulos.
     Columnas: year, month, afd, valid, mean, std, p50, n_base, z, pctl.
     """
-    g = pl.read_parquet(_DATA_DIR / "activity_grid.parquet")
+    # Perezoso y solo con las columnas necesarias: el parquet completo no cabe en poca memoria.
     cyl, cyh, cxl, cxh = aoi_cell_range(lat_min, lat_max, lon_min, lon_max)
-    gs = g.filter(pl.col("sensor_group") == sensor_group)
+    gs = (
+        pl.scan_parquet(_activity_path("activity_grid.parquet"))
+        .filter(pl.col("sensor_group") == sensor_group)
+        .select(["year", "month", "cy", "cx", "active_fire_days"])
+    )
     present = (
-        gs.select(["year", "month"])
-        .unique()
+        _collect(gs.select(["year", "month"]).unique())
         .with_columns(
             pl.struct(["year", "month"])
             .map_elements(
@@ -92,11 +165,10 @@ def aoi_calendar(lat_min, lat_max, lon_min, lon_max, sensor_group, baseline=None
             .alias("valid")
         )
     )
-    sub = gs.filter(
-        pl.col("cy").is_between(cyl, cyh) & pl.col("cx").is_between(cxl, cxh)
-    )
-    sums = sub.group_by(["year", "month"]).agg(
-        pl.col("active_fire_days").sum().alias("afd")
+    sums = _collect(
+        gs.filter(pl.col("cy").is_between(cyl, cyh) & pl.col("cx").is_between(cxl, cxh))
+        .group_by(["year", "month"])
+        .agg(pl.col("active_fire_days").sum().alias("afd"))
     )
     ser = (
         present.join(sums, on=["year", "month"], how="left")
@@ -173,7 +245,7 @@ def aoi_daily(bbox_latlon, start, end, sensor_group="VIIRS"):
     Columnas: date, cells_active, n_hotspots, frp_sum.
     """
     cyl, cyh, cxl, cxh = aoi_cell_range(*bbox_latlon)
-    d = pl.scan_parquet(_DATA_DIR / "activity_daily.parquet").filter(
+    d = pl.scan_parquet(_activity_path("activity_daily.parquet")).filter(
         (pl.col("sensor_group") == sensor_group)
         & pl.col("cy").is_between(cyl, cyh)
         & pl.col("cx").is_between(cxl, cxh)
@@ -194,7 +266,7 @@ def aoi_daily(bbox_latlon, start, end, sensor_group="VIIRS"):
 
 
 def _valid_years(sensor_group, month, lo, hi):
-    g = pl.scan_parquet(_DATA_DIR / "activity_grid.parquet").filter(
+    g = pl.scan_parquet(_activity_path("activity_grid.parquet")).filter(
         (pl.col("sensor_group") == sensor_group)
         & (pl.col("month") == month)
         & pl.col("year").is_between(lo, hi)
@@ -209,7 +281,7 @@ def aoi_mtd_baseline(bbox_latlon, month, day, sensor_group="VIIRS", baseline=Non
     cyl, cyh, cxl, cxh = aoi_cell_range(*bbox_latlon)
     years = _valid_years(sensor_group, month, lo, hi)
     d = (
-        pl.scan_parquet(_DATA_DIR / "activity_daily.parquet")
+        pl.scan_parquet(_activity_path("activity_daily.parquet"))
         .filter(
             (pl.col("sensor_group") == sensor_group)
             & pl.col("cy").is_between(cyl, cyh)
@@ -376,7 +448,7 @@ def nrt_request_plan(bbox, start, end, sources=None, max_days=API_MAX_DAYS):
 POINTS_DEFAULT_LIMIT = 50_000
 
 
-def aoi_points(
+def aoi_points_lazy(
     bbox_latlon,
     start,
     end,
@@ -384,12 +456,8 @@ def aoi_points(
     satellite=None,
     frp_comparable=None,
     exclude_persistent=False,
-    limit=POINTS_DEFAULT_LIMIT,
 ):
-    """Detecciones individuales de hotspots_harmonized.parquet para un AOI + rango de fechas.
-    Devuelve (DataFrame, truncated: bool). Usa el truco limit+1 para detectar truncado sin
-    doble scan.
-    """
+    """LazyFrame con las detecciones de hotspots_harmonized.parquet del AOI y el rango de fechas."""
     cyl, cyh, cxl, cxh = aoi_cell_range(*bbox_latlon)
     lf = pl.scan_parquet(_DATA_DIR / "hotspots_harmonized.parquet").filter(
         pl.col("cy").is_between(cyl, cyh)
@@ -404,6 +472,26 @@ def aoi_points(
         lf = lf.filter(pl.col("frp_comparable") == frp_comparable)
     if exclude_persistent:
         lf = lf.filter(~pl.col("is_persistent"))
+    return lf
+
+
+def aoi_points(
+    bbox_latlon,
+    start,
+    end,
+    sensor_group=None,
+    satellite=None,
+    frp_comparable=None,
+    exclude_persistent=False,
+    limit=POINTS_DEFAULT_LIMIT,
+):
+    """Detecciones individuales de hotspots_harmonized.parquet para un AOI + rango de fechas.
+    Devuelve (DataFrame, truncated: bool). Usa el truco limit+1 para detectar truncado sin
+    doble scan.
+    """
+    lf = aoi_points_lazy(
+        bbox_latlon, start, end, sensor_group, satellite, frp_comparable, exclude_persistent
+    )
     df = _collect(lf.limit(limit + 1))
     truncated = df.height > limit
     return df.head(limit) if truncated else df, truncated

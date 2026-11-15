@@ -1,8 +1,8 @@
 import datetime as dt
-import io
+import os
+import tempfile
 
-import polars as pl
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 
 from modviirs.data import queries as Q
 from modviirs.services import fire_service
@@ -460,6 +460,7 @@ def get_points():
 def get_points_csv():
     """
     Individual hotspot fire detections as a CSV download (full dataset, no cap).
+    The sensor_group column (MODIS/VIIRS) is not included.
     ---
     tags:
       - Fires
@@ -531,14 +532,21 @@ def get_points_csv():
         return jsonify(error="start and end are required as YYYY-MM-DD"), 400
     filters = _parse_point_filters()
     bbox = (lat_min, lat_max, lon_min, lon_max)
-    df = Q.aoi_points_all(bbox, start, end, **filters)
-    buf = io.StringIO()
-    df.with_columns(pl.col("acq_date_d").dt.to_string("%Y-%m-%d")).write_csv(buf)
-    return Response(
-        buf.getvalue(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=hotspots.csv"},
+    # The sensor family column (MODIS/VIIRS) is dropped from the export. The file is
+    # streamed to disk, not built in memory: a wide area can have millions of rows.
+    lf = Q.aoi_points_lazy(bbox, start, end, **filters).drop("sensor_group")
+    fd, path = tempfile.mkstemp(suffix=".csv")
+    os.close(fd)
+    try:
+        lf.sink_csv(path)
+    except Exception:
+        os.remove(path)
+        raise
+    response = send_file(
+        path, mimetype="text/csv", as_attachment=True, download_name="hotspots.csv"
     )
+    response.call_on_close(lambda: os.path.exists(path) and os.remove(path))
+    return response
 
 
 @fires.get("/fires/current")

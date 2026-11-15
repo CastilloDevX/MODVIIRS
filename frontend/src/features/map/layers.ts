@@ -1,10 +1,10 @@
 export type Basemap = { id: string; label: string; layer: string; format: 'jpeg' | 'png'; maxzoom: number; maxMapZoom: number; time?: string }
 
 // maxMapZoom: deepest MapLibre zoom that still shows real detail (above it tiles are only enlarged); 256 px tiles are 1:1 at zoom = tile level - 1.
+// Only the daylight Earth dataset is used.
 // Every layer comes from NASA GIBS (Global Imagery Browse Services, NASA ESDIS), WMTS GoogleMapsCompatible.
 export const BASEMAPS: Basemap[] = [
   { id: 'clear', label: 'Sin nubes', layer: 'BlueMarble_ShadedRelief_Bathymetry', format: 'jpeg', maxzoom: 8, maxMapZoom: 12 },
-  { id: 'dark', label: 'Oscuro', layer: 'VIIRS_Black_Marble', format: 'png', maxzoom: 8, maxMapZoom: 8, time: '2016-01-01' },
 ]
 
 const GIBS = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best'
