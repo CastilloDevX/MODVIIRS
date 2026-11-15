@@ -4,7 +4,10 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ## Sin publicar
 
-_(Pendiente de publicación.)_
+### Backend
+
+- Añadidos endpoints Flask FIRMS para catálogo de fuentes, hotspots GeoJSON y resumen por fecha, con clave servidor, validación de filtros, división de periodos y errores externos sanitizados.
+- Añadidas pruebas simuladas para CSV MODIS/VIIRS, paginación temporal, validación, errores de proveedor y protección de credenciales.
 
 ## 0.2.0 — 2026-11-14
 

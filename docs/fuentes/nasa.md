@@ -36,6 +36,12 @@ Antes de integrar, consultar [data availability](https://firms.modaps.eosdis.nas
 
 Describe detecciones y anomalías térmicas, resolución nominal de 375 m y mayor respuesta a fuegos pequeños. Define adquisición en UTC, confianza baja/nominal/alta, colección y procesamiento mediante `version`, y FRP en MW. Algunos campos, como `Type`, dependen del producto; no asumir que todo CSV tiene el mismo esquema. [Fuente](https://firms.modaps.eosdis.nasa.gov/content/descriptions/FIRMS_VIIRS_Firehotspots.html).
 
+## Verificación para la integración Flask — 15 de noviembre de 2026
+
+La documentación vigente de [FIRMS API Area](https://firms.modaps.eosdis.nasa.gov/api/area/) confirma las ocho fuentes MODIS/VIIRS incorporadas al catálogo, el orden del área `west,south,east,north`, límites globales de longitud/latitud, y `DAY_RANGE` de 1 a 5 días. Cuando se especifica fecha, los resultados cubren esa fecha y los días siguientes hasta completar el rango. La clave MAP_KEY es necesaria; la página indica un límite de 5.000 transacciones por ventana de 10 minutos y advierte que una solicitud grande puede consumir varias transacciones.
+
+La página de [data availability](https://firms.modaps.eosdis.nasa.gov/api/data_availability/) lista disponibilidad por producto. La lista local de fuentes no publica fechas de disponibilidad, y la integración no presupone que todo producto tenga datos para cualquier periodo. La guía oficial [FIRMS API en Python](https://firms.modaps.eosdis.nasa.gov/content/academy/data_api/firms_api_use.html) distingue productos NRT de SP e indica fechas de disponibilidad GMT. Se consultó documentación pública; no se consultaron datos protegidos con MAP_KEY ni se confirmó cobertura para un periodo concreto.
+
 ## Discrepancias abiertas
 
 | Producto | Archivo (3) | Active Fire (2) | Descripción VIIRS (5) |
