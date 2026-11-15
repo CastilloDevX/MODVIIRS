@@ -385,3 +385,51 @@ def snapshot(cfg, out: str | None = None) -> str:
         if col is not None:
             (destino / "week" / f"{s}.json").write_text(json.dumps(col, separators=(",", ":")))
     return f"{len(todas)} semanas -> {destino}"
+
+
+def _tabla_larga(cfg) -> pd.DataFrame:
+    """Historico walk-forward + vivo 2026 en una sola tabla zona x semana."""
+    ruta = data_dir(cfg) / "prediccion" / "pred_historico.parquet"
+    h = _historico(str(ruta), ruta.stat().st_mtime)[
+        ["zona_id", "semana", "prob", "base", "valor", "p90", "anomalia"]
+    ].assign(fuente="historico")
+    actual = _json(cache_dir(cfg) / "prediccion_actual.json")
+    if actual:
+        vivo = pd.DataFrame(
+            [
+                {"semana": pd.Timestamp(s), **f}
+                for s, filas in actual["semanas"].items()
+                for f in filas
+            ]
+        )
+        if len(vivo):
+            vivo = vivo[["zona_id", "semana", "prob", "base", "valor", "p90", "anomalia"]]
+            h = pd.concat([h[~h.semana.isin(vivo.semana)], vivo.assign(fuente="vivo")])
+    return h
+
+
+def get_series(cfg, bbox=None, start: str = "2015-01-05", end: str | None = None) -> dict:
+    """Serie semanal agregada de las zonas que tocan el bbox (para un dashboard)."""
+    zonas = _zonas(str(data_dir(cfg) / "prediccion" / "zonas.parquet"))
+    ids = [z for z in zonas if _en_bbox(z, zonas, bbox)]
+    t = _tabla_larga(cfg)
+    t = t[t.zona_id.isin(ids) & (t.semana >= pd.Timestamp(start))]
+    if end:
+        t = t[t.semana <= pd.Timestamp(end)]
+    t = t.assign(alto=t.prob >= NIVELES[0][0])
+    g = t.groupby("semana")
+    s = pd.DataFrame(
+        {
+            "fuente": g.fuente.last(),
+            "zonas": g.zona_id.size(),
+            "prob_max": g.prob.max().round(3),
+            "prob_media": g.prob.mean().round(3),
+            "zonas_alto": g.alto.sum(),
+            "valor": g.valor.sum(min_count=1).round(1),
+            "p90": g.p90.sum(min_count=1).round(1),
+            "anomalias": g.anomalia.sum(min_count=1),
+        }
+    ).reset_index()
+    s["semana"] = s.semana.dt.strftime("%Y-%m-%d")
+    s = s.astype(object).where(s.notna(), None)
+    return {"zonas": ids, "data": s.to_dict(orient="records")}

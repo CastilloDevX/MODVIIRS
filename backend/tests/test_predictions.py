@@ -14,21 +14,21 @@ def client(tmp_path, monkeypatch):
 
 def test_predictions_without_cache_returns_503(client):
     c, _ = client
-    r = c.get("/api/v1/predictions")
+    r = c.get("/api/predictions")
     assert r.status_code == 503
     assert r.is_json
 
 
 def test_validation_and_history(client):
     c, _ = client
-    v = c.get("/api/v1/predictions/validation")
+    v = c.get("/api/predictions/validation")
     assert v.status_code == 200 and "resumen_h1" in v.json
-    w = c.get("/api/v1/predictions/weeks")
+    w = c.get("/api/predictions/weeks")
     assert w.status_code == 200 and "2024-04-22" in w.json["historico"]
-    g = c.get("/api/v1/predictions/week/2024-04-22?lat_min=18&lat_max=20&lon_min=-90&lon_max=-88")
+    g = c.get("/api/predictions/week/2024-04-22?lat_min=18&lat_max=20&lon_min=-90&lon_max=-88")
     assert g.status_code == 200 and g.json["type"] == "FeatureCollection"
     assert 0 < len(g.json["features"]) < 65
-    assert c.get("/api/v1/predictions/week/1999-01-04").status_code == 404
+    assert c.get("/api/predictions/week/1999-01-04").status_code == 404
 
 
 def test_predictions_from_cache(client):
@@ -54,7 +54,7 @@ def test_predictions_from_cache(client):
         "semanas": {"2026-11-09": [fila], "2026-11-16": [fila]},
     }
     (tmp / "prediccion_actual.json").write_text(json.dumps(cache))
-    r = c.get("/api/v1/predictions")
+    r = c.get("/api/predictions")
     assert r.status_code == 200
     assert r.json["semana_en_curso"]["features"][0]["properties"]["prob"] == 0.42
     assert r.json["semana_proxima"]["resumen"]["zonas_alto"] == 1

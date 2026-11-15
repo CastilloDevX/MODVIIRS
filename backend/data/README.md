@@ -56,9 +56,3 @@ Q.aoi_calendar(19.0, 20.0, -100.0, -99.0, "VIIRS")        # year, month, afd, va
 Q.aoi_monthly_medians(19.0, 20.0, -100.0, -99.0)          # 12 filas: month, median, p25, p75, mean, std, min, max, n_years, baseline_corto
 ```
 `/calendar` y `/medians` solo necesitan `activity_grid.parquet`. Funciones, endpoints y plan de implementación: `docs/IMPLEMENTACION_API.md`; tablas y casos de uso: `docs/GUIA_DATASETS.md`.
-
-## Archivos grandes fuera de git
-
-GitHub rechaza archivos de más de 100 MB, por eso `hotspots_harmonized.parquet`, `activity_grid.parquet` (y los que se generan) están en `.gitignore`.
-Opciones para que el backend los tenga: (1) generarlos localmente con los comandos de arriba; (2) subirlos a almacenamiento externo (release asset, bucket) y apuntar `FIRMS_OUT` allí;
-(3) Git LFS para `activity_grid.parquet` (quita su línea de `.gitignore`, luego `git lfs track "Data/armonizacion/activity_grid.parquet"`). `hotspots_harmonized.parquet` (~2.9 GB) conviene dejarlo en almacenamiento externo (revisa los límites por archivo de LFS en la documentación de GitHub).

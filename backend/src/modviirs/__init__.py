@@ -12,7 +12,38 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.config.from_prefixed_env(prefix="MODVIIRS")
     if test_config is not None:
         app.config.update(test_config)
-    app.register_blueprint(api, url_prefix="/api/v1")
+    app.register_blueprint(api, url_prefix="/api")
+
+    try:
+        from flasgger import Swagger
+
+        Swagger(
+            app,
+            config={
+                "headers": [],
+                "specs": [
+                    {
+                        "endpoint": "apispec",
+                        "route": "/apispec.json",
+                        "rule_filter": lambda rule: rule.rule.startswith("/api/"),
+                        "model_filter": lambda tag: True,
+                    }
+                ],
+                "static_url_path": "/flasgger_static",
+                "swagger_ui": True,
+                "specs_route": "/apidocs",
+            },
+            template={
+                "info": {
+                    "title": "MODVIIRS API",
+                    "description": "Hotspot fire activity from MODIS/VIIRS sensors.",
+                    "version": "1.0.0",
+                },
+                "basePath": "/",
+            },
+        )
+    except ImportError:
+        pass
 
     @app.errorhandler(HTTPException)
     def handle_http_error(error: HTTPException):
