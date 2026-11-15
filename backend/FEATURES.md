@@ -16,13 +16,13 @@ Given a bounding box, returns the historical fire distribution summarized by cal
 Given a bounding box and a date range, returns the raw fire detection records (location, date, FRP, confidence, satellite) from the harmonized point dataset. The JSON response is capped at 50,000 records and includes a `truncated` flag when the result exceeds that limit. The CSV variant always returns the full dataset as a file download. Optional filters: `sensor_group`, `satellite`, `frp_comparable`, `exclude_persistent`.
 `GET /api/v1/fires/points` · `GET /api/v1/fires/points.csv`
 
+**Day-by-day fire activity between two dates**
+Given a bounding box and a date range, returns the daily count of active fire cells, total hotspot detections, and total FRP sum. Useful for visualizing fire pulses and comparing specific fire events across days within a season or period.
+`GET /api/v1/fires/timeline`
+
 ---
 
 ## Pending
-
-**Day-by-day fire activity between two dates**
-Given a bounding box and a date range, returns the daily count of active fire cells, total hotspot detections, and total FRP sum. Useful for visualizing fire pulses and comparing specific fire events across days within a season or period. Code is complete — requires `activity_daily.parquet`, generate it with `python aoi_queries.py build-daily`.
-`GET /api/v1/fires/timeline`
 
 **Current month fire activity vs historical baseline (NRT)**
 Given a bounding box, fetches real-time VIIRS fire detections from the NASA FIRMS Area API for the ongoing month and compares them against the historical VIIRS baseline for the same day-range. Returns the month-to-date fire count alongside baseline statistics (median, percentiles, z-score) so the user can assess whether the current fire season is anomalous. Requires `MODVIIRS_FIRMS_MAP_KEY`.
