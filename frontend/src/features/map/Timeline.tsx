@@ -69,7 +69,7 @@ export function Timeline({ start, end, offset, stops, series, onOffsetChange }: 
             <path d={`${path} L1000,100 L0,100 Z`} fill="url(#hc-fill)" />
             <path d={path} fill="none" stroke="#ffd54f" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           </svg>
-          <span className="hc-peak" style={{ left: `${pct(peak)}%`, top: `${cy(series![peak])}%` }}><em>Pico {series![peak].toLocaleString('en')} · {formatShort(addDays(start, peak))}</em></span>
+          <span className="hc-peak" style={{ left: `${pct(peak)}%`, top: `${cy(series![peak])}%` }}><em>Peak {series![peak].toLocaleString('en')} · {formatShort(addDays(start, peak))}</em></span>
           {hover !== null && (
             <>
               <span className="hc-line" style={{ left: `${pct(hover)}%` }} />
@@ -80,7 +80,7 @@ export function Timeline({ start, end, offset, stops, series, onOffsetChange }: 
         </div>
       )}
       <div className="timeline-body" onPointerMove={e => setHover(dayAt(e.clientX))} onPointerLeave={() => setHover(null)}>
-        <div ref={trackRef} className={`track${grabbing ? ' dragging' : ''}`} role="slider" tabIndex={0} aria-label="Línea de tiempo"
+        <div ref={trackRef} className={`track${grabbing ? ' dragging' : ''}`} role="slider" tabIndex={0} aria-label="Timeline"
           aria-valuemin={0} aria-valuemax={days} aria-valuenow={offset} aria-valuetext={formatLong(current)}
           onKeyDown={onKeyDown}
           onPointerDown={e => { dragging.current = true; setGrabbing(true); e.currentTarget.setPointerCapture(e.pointerId); fromPointer(e.clientX) }}

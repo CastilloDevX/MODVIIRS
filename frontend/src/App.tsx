@@ -10,7 +10,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<MapPage />} />
         <Route path="/landing" element={<LandingPage />} />
-        <Route path="/map" element={<MapPage />} />
         <Route path="*" element={<h1 className="title">404</h1>} />
       </Routes>
     </Suspense>

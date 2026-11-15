@@ -78,7 +78,7 @@ export function MapPage() {
           {region && !picking && (
             <div className="country-field">
               <span>{fmt(region.north, 'N', 'S')} · {fmt(region.south, 'N', 'S')}<br />{fmt(region.west, 'E', 'W')} · {fmt(region.east, 'E', 'W')}</span>
-              <button type="button" aria-label="Quitar región" onClick={() => setRegion(null)}>×</button>
+              <button type="button" aria-label="Clear region" onClick={() => setRegion(null)}>×</button>
             </div>
           )}
         </div>
@@ -102,7 +102,7 @@ export function MapPage() {
           <h2 className="label">Country</h2>
           <div className="country-field">
             <span>{country ? country.name : 'Click a country on the map'}</span>
-            {country && <button type="button" aria-label="Quitar selección de país" onClick={() => setCountry(null)}>×</button>}
+            {country && <button type="button" aria-label="Clear country selection" onClick={() => setCountry(null)}>×</button>}
           </div>
         </div>}
       </aside>
@@ -115,11 +115,11 @@ export function MapPage() {
             <AnalysisPanel key={`${region.west},${region.south},${region.east},${region.north}`} region={region} start={range.start} end={range.end} days={days}
               timeline={timeline} calendar={calendar} medians={medians} points={pointsResponse}
               windowStart={windowStart} windowEnd={windowEnd} stepFrom={offset} stepTo={stepEnd(offset, stops, days)} onClose={() => setPanelOpen(false)} />
-          ) : <button type="button" className="panel-tab" onClick={() => setPanelOpen(true)}>ANÁLISIS</button>) : null}
+          ) : <button type="button" className="panel-tab" onClick={() => setPanelOpen(true)}>ANALYSIS</button>) : null}
           filters={region && !picking ? (
             <>
-              <h2 className="label">Hotspots · intensidad (0 – 1)</h2>
-              <ToggleGroup multiple orientation="vertical" variant="outline" value={phases} aria-label="Fases de intensidad de los hotspots"
+              <h2 className="label">Hotspots · intensity (0 – 1)</h2>
+              <ToggleGroup multiple orientation="vertical" variant="outline" value={phases} aria-label="Hotspot intensity phases"
                 onValueChange={v => setPhases(v as PhaseId[])}>
                 {PHASES.map(ph => (
                   <ToggleGroupItem key={ph.id} value={ph.id} className="phase-item">
@@ -134,11 +134,11 @@ export function MapPage() {
           ) : null}
           controls={region && !picking ? (
             <div className="control-group scale-group">
-              <ToggleGroup variant="outline" value={[stepUnit]} aria-label="Escala de los pasos"
+              <ToggleGroup variant="outline" value={[stepUnit]} aria-label="Timeline step scale"
                 onValueChange={v => { if (v[0]) changeStepUnit(v[0] as StepUnit) }}>
                 {STEP_UNITS.map(u => <ToggleGroupItem key={u.id} value={u.id}>{u.label}</ToggleGroupItem>)}
               </ToggleGroup>
-              <span className="caption">Escala de los pasos de la línea de tiempo</span>
+              <span className="caption">Timeline step scale</span>
             </div>
           ) : null} />
         {region && !picking && <Timeline start={range.start} end={range.end} offset={offset} stops={stops} series={hoverSeries} onOffsetChange={setOffset} />}

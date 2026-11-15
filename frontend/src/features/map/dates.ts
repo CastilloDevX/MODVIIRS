@@ -1,8 +1,8 @@
 export const DAY_MS = 86_400_000
-const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const MONTHS_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-export const monthName = (m: number) => MONTHS_ES[m]
+export const monthName = (m: number) => MONTHS_EN[m]
 export const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 export const sameDay = (a: Date, b: Date) => a.getTime() === b.getTime()
 export const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
@@ -25,7 +25,7 @@ export function monthGrid(year: number, month: number): Date[] {
 
 export type StepUnit = 'day' | 'week' | 'month' | 'year'
 export const STEP_UNITS: { id: StepUnit; label: string }[] = [
-  { id: 'day', label: 'Días' }, { id: 'week', label: 'Semanas' }, { id: 'month', label: 'Meses' }, { id: 'year', label: 'Años' },
+  { id: 'day', label: 'Days' }, { id: 'week', label: 'Weeks' }, { id: 'month', label: 'Months' }, { id: 'year', label: 'Years' },
 ]
 
 /** Adds k units to a date; month/year steps keep the day of month, clamped to the shorter month. */

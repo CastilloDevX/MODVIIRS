@@ -14,7 +14,7 @@ import './landing.css'
 
 function MapLink({ className = '', children = 'Abrir visualizador' }) {
   return (
-    <Link to="/map" className={`landing-map-link ${className}`}>
+    <Link to="/" className={`landing-map-link ${className}`}>
       {children}<ArrowUpRight size={18} aria-hidden="true" />
     </Link>
   )
@@ -98,7 +98,7 @@ export function LandingPage() {
                 <div>
                   <h2 id="visualizer-title">Features del visualizador<span>.</span></h2>
                   <p className="landing-section-description">Explora el mapa, recorre el tiempo y consulta el análisis.</p>
-                  <Link to="/map" className="landing-text-link">Ir al visualizador<ArrowRight size={18} aria-hidden="true" /></Link>
+                  <Link to="/" className="landing-text-link">Ir al visualizador<ArrowRight size={18} aria-hidden="true" /></Link>
                 </div>
               </div>
             </Reveal>

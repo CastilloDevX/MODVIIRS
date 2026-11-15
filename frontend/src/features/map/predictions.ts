@@ -131,3 +131,11 @@ export const LEVELS = [
   { label: '≥ 50 %', color: '#e53e3e' },
 ]
 export const pct = (p: number | null) => (p === null ? '—' : `${Math.round(p * 100)} %`)
+
+export type ReliabilityWeek = { semana: number; auc: number | null; anomalias: number; n: number }
+/** Validated accuracy (walk-forward AUC) of the forecast for each week of the year in the selected area (Yucatán model). */
+export async function getForecastReliability(bbox: Bbox | null, signal: AbortSignal) {
+  const r = await fetch(`${API}/predictions/reliability?${bboxQuery(bbox)}`, { signal })
+  if (!r.ok) throw new Error(`/predictions/reliability ${r.status}`)
+  return (await r.json()) as { zonas: number; por_semana: ReliabilityWeek[] }
+}

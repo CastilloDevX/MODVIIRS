@@ -229,7 +229,7 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
         ? `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'} · ${Math.abs(((lng + 540) % 360) - 180).toFixed(4)}° ${((lng + 540) % 360) - 180 >= 0 ? 'E' : 'W'}`
         : '—'
     }}>
-      <div ref={hostRef} className="map-canvas" role="application" aria-label="Mapa interactivo de la Tierra: arrastra para girar, rueda para acercar" />
+      <div ref={hostRef} className="map-canvas" role="application" aria-label="Interactive map of the Earth: drag to rotate, scroll to zoom" />
       {picking && (
         <div
           className="picker-overlay"
@@ -273,16 +273,16 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
       {filters && <div className="map-filters">{filters}</div>}
       <div className="map-controls">
         <div className="control-group">
-          <ToggleGroup variant="outline" value={[mode]} aria-label="Modo de vista"
+          <ToggleGroup variant="outline" value={[mode]} aria-label="View mode"
             onValueChange={v => { if (v[0]) onModeChange(v[0] as ViewMode) }}>
             <ToggleGroupItem value="3d">3D</ToggleGroupItem>
             <ToggleGroupItem value="2d">2D</ToggleGroupItem>
           </ToggleGroup>
-          <span className="caption">Vista del mapa: globo 3D o mapa plano 2D</span>
+          <span className="caption">Map view: 3D globe or flat 2D map</span>
         </div>
         {controls}
       </div>
-      <span ref={coordsRef} className="map-coords" aria-label="Latitud y longitud del puntero">—</span>
+      <span ref={coordsRef} className="map-coords" aria-label="Pointer latitude and longitude">—</span>
       {truncated && (
         <div className="fire-truncated" role="status">Showing first 50,000 detections · use CSV export for full data</div>
       )}

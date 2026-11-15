@@ -6,6 +6,8 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ### Backend
 
+- Nuevo `GET /api/predictions/reliability`: precisión comprobada (AUC walk-forward, era VIIRS) por semana del año para las zonas del área.
+- `/api/predictions/validation` y demás JSON de caché ya no devuelven `NaN` (no es JSON válido y el navegador no podía leerlo, por lo que faltaban las gráficas de calibración): se devuelve `null`.
 - `queries.py`: si `activity_daily.parquet` / `activity_grid.parquet` son punteros de Git LFS (sin `git lfs pull`), se regeneran desde `hotspots_harmonized.parquet` en `backend/data/.derived/` (ignorado por Git, un parquet por año y sensor, unos 45 s la primera vez). Corrige los errores 500 de `/fires/timeline`, `/calendar` y `/medians`.
 - `/fires/points.csv`: se genera en streaming a un archivo temporal (no en memoria) y ya no incluye la columna `sensor_group` (MODIS/VIIRS).
 - `/fires/points.csv` ahora se envía en streaming mes a mes (sin archivo temporal): antes fallaba con `Disk quota exceeded` / 500 en regiones grandes y rangos largos.
@@ -13,6 +15,11 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ### Frontend
 
+- PREDICTIONS: la confiabilidad de cada día ahora depende de la época del año (precisión comprobada por semana del año, ventana de ±2 semanas) y de la distancia a la fecha establecida, por lo que aparecen días amarillos (abril–junio, cuando el modelo es menos preciso). Nuevas gráficas: confiabilidad a lo largo del año, pronóstico vs. realidad por año, error del modelo vs. error de la línea base, precisión del modelo vs. línea base por año y calibración. Se quitó la tarjeta «How far ahead can it be trusted?».
+- La página `/` está completamente en inglés (menús, paneles, gráficos, calendarios y etiquetas); la landing no se tocó.
+- Pestaña PREDICTIONS (antes FUTURE, antes PRONÓSTICO): solo futuro. El pronóstico empieza una semana después de la fecha establecida (la Final date) y cubre 2 semanas, el rango prometedor. El calendario solo carga esos meses, solo permite elegir fechas (sin selector de mes o año), abre con todo el periodo seleccionado desde el día 1 y muestra la confiabilidad en porcentaje. Se quitó el texto de ayuda bajo el calendario y las tarjetas que mostraban el pasado.
+- La ruta `/map` se eliminó: la app vive solo en `/` (y `/landing`); los enlaces de la landing apuntan a `/`.
+- PRONÓSTICO: primer widget «¿Qué tan confiable es la predicción?»: calendario con cada día predicho en verde (muy confiable, más de 75 %) o amarillo (a medias, más de 50 %); sin color si es menor o no hay predicción. Un toque elige un día y un segundo toque un periodo; muestra las fechas y el porcentaje de confiabilidad en grande. Confiabilidad = precisión comprobada (AUC) del modelo: por año en la Península de Yucatán, por país en el modelo de 6 países y por horizonte (1 sem. 85 %, 2 sem. 81 %) en las semanas futuras en vivo.
 - Vista PRONÓSTICO rediseñada con los mismos patrones del histórico: tarjetas animadas, KPIs, gráficos con la misma paleta y tipografía Prompt. Nuevas tarjetas «¿Hasta cuándo es confiable?» (AUC y AP por horizonte de 1, 2 y 4 semanas frente a la línea base) y «Calibración».
 - La sección de features de `/landing` presenta mapa interactivo, timeline de datos armonizados, análisis de picos y módulo de gráficas. Se añadieron capturas reales del mapa y del control temporal con datos de abril de 2024; las capturas de picos y gráficas se aplazan por indicación del usuario.
 - Footer adaptable de la landing con MODVIIRS y marca Orbitron, equipo Astra 11 y NASA, renderizado desde el componente `LandingFooter`. Se reutilizan los logos editados de `frontend/public/images/`, con NASA transparente y Astra 11 recortado.

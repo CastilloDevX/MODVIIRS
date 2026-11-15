@@ -41,8 +41,8 @@ export function AreaChart({ values, labels, dateAt, color, unit, highlight }: Ar
   const h = hover === null ? null : Math.min(cols.length - 1, hover)
   return (
     <div className="chart">
-      <div className="chart-readout">{h === null ? `Pico: ${nf(values[toDay(peakIdx)] ?? 0)} ${unit} · ${dateAt(toDay(peakIdx))}` : `${dateAt(toDay(h))} · ${nf(values[toDay(h)] ?? 0)} ${unit}`}</div>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Serie diaria"
+      <div className="chart-readout">{h === null ? `Peak: ${nf(values[toDay(peakIdx)] ?? 0)} ${unit} · ${dateAt(toDay(peakIdx))}` : `${dateAt(toDay(h))} · ${nf(values[toDay(h)] ?? 0)} ${unit}`}</div>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Daily series"
         onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); const px = ((e.clientX - r.left) / r.width) * W; setHover(Math.max(0, Math.round(((px - padL) / (W - padL - 4)) * (cols.length - 1)))) }}
         onPointerLeave={() => setHover(null)}>
         <defs><linearGradient id={`g-${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={color} stopOpacity=".7" /><stop offset="1" stopColor={color} stopOpacity=".05" /></linearGradient></defs>
@@ -76,7 +76,7 @@ export function Heatmap({ rows }: { rows: CalendarRow[] }) {
   const byKey = new Map(rows.map(r => [`${r.year}-${r.month}`, r]))
   const padL = 30, cw = (W - padL) / 12, ch = 14
   return (
-    <svg viewBox={`0 0 ${W} ${years.length * ch + 16}`} role="img" aria-label="Calendario mensual de anomalías">
+    <svg viewBox={`0 0 ${W} ${years.length * ch + 16}`} role="img" aria-label="Monthly anomaly calendar">
       {MONTHS.map((m, i) => <text key={i} x={padL + i * cw + cw / 2} y={9} className="axis" textAnchor="middle">{m}</text>)}
       {years.map((yr, yi) => (
         <g key={yr}>
@@ -87,7 +87,7 @@ export function Heatmap({ rows }: { rows: CalendarRow[] }) {
             const fill = !r.valid || r.z === null ? '#2a2a2a' : zColor(r.z)
             return (
               <rect key={mi} className="heat-cell" style={{ animationDelay: `${(yi * 12 + mi) * 6}ms` }} x={padL + mi * cw + 1} y={16 + yi * ch} width={cw - 2} height={ch - 2} rx="2" fill={fill}>
-                <title>{`${yr}-${String(mi + 1).padStart(2, '0')} · AFD ${nf(r.afd)}${r.valid ? ` · z ${r.z?.toFixed(2) ?? '—'} · percentil ${r.pctl === null ? '—' : (r.pctl * 100).toFixed(0)}` : ' · mes sin datos del sensor'}`}</title>
+                <title>{`${yr}-${String(mi + 1).padStart(2, '0')} · AFD ${nf(r.afd)}${r.valid ? ` · z ${r.z?.toFixed(2) ?? '—'} · percentile ${r.pctl === null ? '—' : (r.pctl * 100).toFixed(0)}` : ' · month without sensor data'}`}</title>
               </rect>
             )
           })}
@@ -107,12 +107,12 @@ export function BandChart({ rows }: { rows: MedianRow[] }) {
   const band = (lo: (r: MedianRow) => number, hi: (r: MedianRow) => number) =>
     `${sorted.map((r, i) => `${i ? 'L' : 'M'}${x(r.month)},${y(hi(r))}`).join(' ')} ${[...sorted].reverse().map(r => `L${x(r.month)},${y(lo(r))}`).join(' ')} Z`
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Estacionalidad típica">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Typical seasonality">
       {[0, 0.5, 1].map(t => <g key={t}><line x1={padL} x2={W - 4} y1={y(max * t)} y2={y(max * t)} className="grid" /><text x={padL - 4} y={y(max * t) + 3} className="axis" textAnchor="end">{nf(max * t)}</text></g>)}
       <path className="area-fill" d={band(r => r.min, r => r.max)} fill="#ff8f00" opacity=".18" />
       <path className="area-fill" d={band(r => r.p25, r => r.p75)} fill="#ff8f00" opacity=".45" />
       <path className="draw" pathLength={1} d={sorted.map((r, i) => `${i ? 'L' : 'M'}${x(r.month)},${y(r.median)}`).join(' ')} fill="none" stroke="#fff" strokeWidth="1.8" />
-      {sorted.map(r => <circle key={r.month} cx={x(r.month)} cy={y(r.mean)} r="2.4" fill="#ffd600" className="pop"><title>{`Mes ${r.month} · mediana ${nf(r.median)} · media ${nf(r.mean)} ± ${nf(r.std)} · P25–P75 ${nf(r.p25)}–${nf(r.p75)} · rango ${nf(r.min)}–${nf(r.max)} · ${r.n_years} años${r.baseline_corto ? ' (línea base corta)' : ''}`}</title></circle>)}
+      {sorted.map(r => <circle key={r.month} cx={x(r.month)} cy={y(r.mean)} r="2.4" fill="#ffd600" className="pop"><title>{`Month ${r.month} · median ${nf(r.median)} · mean ${nf(r.mean)} ± ${nf(r.std)} · P25–P75 ${nf(r.p25)}–${nf(r.p75)} · range ${nf(r.min)}–${nf(r.max)} · ${r.n_years} years${r.baseline_corto ? ' (short baseline)' : ''}`}</title></circle>)}
       {MONTHS.map((m, i) => <text key={i} x={x(i + 1)} y={H - 3} className="axis" textAnchor="middle">{m}</text>)}
     </svg>
   )
@@ -124,7 +124,7 @@ export function Histogram({ counts }: { counts: number[] }) {
   const max = Math.max(1, ...counts)
   const bw = W / counts.length
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Distribución de FRP">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="FRP distribution">
       {counts.map((c, i) => {
         const h = (c / max) * (H - padB - padT)
         const t = i / (counts.length - 1)

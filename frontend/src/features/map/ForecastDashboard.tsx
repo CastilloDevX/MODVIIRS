@@ -1,62 +1,75 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Calendar } from '@/components/ui/calendar'
 import { Card, Kpi } from './charts'
+import { addDays, diffDays, isoDate } from './dates'
 import type { Bbox } from './region'
 import {
-  getCurrentForecast, getForecastSeries, getForecastValidation, getGlobalCountries, mondayOf,
-  type CountryInfo, type CurrentForecast, type ForecastSeries, type SeriesRow,
+  getForecastReliability, getForecastSeries, getForecastValidation, getGlobalCountries,
+  type CountryInfo, type ForecastSeries, type ReliabilityWeek, type SeriesRow,
 } from './predictions'
 import './forecast.css'
 
 /**
- * Pronóstico de actividad ANÓMALA de puntos de calor para la región seleccionada (rama `predictivo`),
- * con las mismas tarjetas, KPIs y gráficos que la vista HISTÓRICO.
+ * PREDICTIONS view: how reliable the forecast is for the days after the established date (the final date of the range).
+ * Only future days are shown: the forecast starts one week after the established date and covers 2 weeks,
+ * the range in which the model is promising.
  *
- * Datos (backend Flask, docs/API_PREDICCIONES.md):
- *   GET /api/predictions/series      serie semanal; el backend elige el modelo: Península de Yucatán
- *                                    (0.5°, clima NASA POWER, en vivo 2026) o 6 países (1°, 2023–2025)
- *   GET /api/predictions             semana en curso y próxima (solo península, en vivo)
- *   GET /api/predictions/validation  y /api/predictions/global/countries  → precisión comprobada
+ * Reliability of a day = validated accuracy (walk-forward AUC) of the model in that time of the year, lowered by the
+ * distance to the established date (weeks ahead). Source: walk-forward validation 2015–2025 (prediccion/README.md).
  */
-type Props = { region: Bbox | null; date: Date }
-type Validation = { auc: number; base: number; ap: number; apBase: number; auc2: number; ap2: number; auc26?: number; base26?: number; calibration: { prob: number; observed: number; n: number }[] }
+type Props = { region: Bbox | null; anchor: Date }
+type Picked = { from: Date; to: Date; ref: string }
+type Validation = { years: { year: number; auc: number; base: number }[]; calibration: { prob: number; observed: number; n: number }[] }
 
-const ALERTS = [
-  { min: 0.5, key: 'CRÍTICO', color: '#ff4d4f' },
-  { min: 0.3, key: 'ELEVADO', color: '#ff8a3d' },
-  { min: 0.1, key: 'VIGILANCIA', color: '#f5c542' },
-  { min: 0, key: 'NORMAL', color: '#3ccf8e' },
-]
-const alertOf = (p: number | null | undefined) => (p == null ? null : ALERTS.find(a => p >= a.min) ?? ALERTS[3])
-
-/**
- * How far ahead the model stays useful. Walk-forward validation 2015–2025 (era VIIRS), prediccion/README.md.
- * The live service publishes 1 and 2 weeks ahead; 4 weeks is validated offline only.
- */
+/** Walk-forward validation (era VIIRS 2015–2025). 3 weeks is interpolated between the 2- and 4-week results. */
 const HORIZONS = [
-  { weeks: 1, auc: 0.847, ap: 0.272, verdict: 'Confiable', color: '#3ccf8e' },
-  { weeks: 2, auc: 0.81, ap: 0.191, verdict: 'Confiable', color: '#3ccf8e' },
-  { weeks: 4, auc: 0.776, ap: 0.143, verdict: 'Orientativo', color: '#f5c542' },
+  { weeks: 1, auc: 0.847, ap: 0.272 },
+  { weeks: 2, auc: 0.81, ap: 0.191 },
+  { weeks: 3, auc: 0.79, ap: 0.167 },
+  { weeks: 4, auc: 0.776, ap: 0.143 },
 ]
-const BASE = { auc: 0.582, ap: 0.071 }
+const START_AFTER_DAYS = 7 // the forecast starts one week after the established date
+const WINDOW_DAYS = 14 // and covers 2 weeks
 
-const fmtWeek = (iso?: string) =>
-  iso ? new Date(`${iso}T12:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
-const WEEKS_BEFORE = 104, WEEKS_AFTER = 26 // ventana de las gráficas alrededor de la semana elegida
+/** Level of a reliability value: > 75 % very reliable, > 50 % medium, otherwise no colour. */
+const levelOf = (v: number) => (v > 0.75 ? 'high' : v > 0.5 ? 'medium' : null)
+const LEVELS = {
+  high: { label: 'VERY RELIABLE', color: '#00e676', text: 'You can rely on this forecast.' },
+  medium: { label: 'MEDIUM RELIABILITY', color: '#ffc400', text: 'Use it as a hint, not as a certainty.' },
+}
+/** ISO week (1–52) and ISO year of a date; week 53 counts as 52, like the backend. */
+function isoWeekOf(d: Date) {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7) + 3)
+  const year = t.getUTCFullYear()
+  const jan4 = new Date(Date.UTC(year, 0, 4))
+  const week = 1 + Math.round(((t.getTime() - jan4.getTime()) / 86_400_000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7)
+  return { year, week: Math.min(week, 52) }
+}
+const fmtDay = (d: Date) => d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
 
-export function ForecastDashboard({ region, date }: Props) {
-  const [live, setLive] = useState<CurrentForecast | null>(null)
+/** Validated accuracy of the model for a day that is `daysAhead` days after the data cut-off. */
+const accuracyAhead = (daysAhead: number) => {
+  const weeks = Math.min(Math.max(Math.ceil(daysAhead / 7), 1), HORIZONS.length)
+  return HORIZONS[weeks - 1].auc
+}
+
+export function ForecastDashboard({ region, anchor }: Props) {
   const [series, setSeries] = useState<{ key: string; data: ForecastSeries | null } | null>(null)
   const [val, setVal] = useState<Validation | null>(null)
   const [countries, setCountries] = useState<CountryInfo[]>([])
+  const [season, setSeason] = useState<{ key: string; weeks: ReliabilityWeek[] } | null>(null)
+  const [picked, setPicked] = useState<Picked | null>(null)
+  const [second, setSecond] = useState(false)
   const key = region ? `${region.west},${region.south},${region.east},${region.north}` : ''
 
   useEffect(() => {
     if (!region) return
     const ctrl = new AbortController()
-    getCurrentForecast(ctrl.signal, region).then(setLive).catch(() => {})
     getForecastSeries(region, ctrl.signal)
       .then(data => setSeries({ key, data }))
       .catch(e => { if ((e as Error).name !== 'AbortError') setSeries({ key, data: null }) })
+    getForecastReliability(region, ctrl.signal).then(r => setSeason({ key, weeks: r.por_semana })).catch(() => {})
     return () => ctrl.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
@@ -64,239 +77,253 @@ export function ForecastDashboard({ region, date }: Props) {
   useEffect(() => {
     const ctrl = new AbortController()
     getForecastValidation(ctrl.signal).then(v => {
-      const h1 = v.resumen_h1 as { auc: number; auc_base: number; ap: number; ap_base: number } | undefined
-      const h2 = v.resumen_h2 as { auc: number; ap: number } | undefined
-      const t = v.temporada_2026_vivo as { auc?: number; auc_base?: number } | undefined
       const cal = (v.calibracion as { prob_media: number; observado: number; n: number }[] | undefined) ?? []
-      if (h1 && h2) setVal({ auc: h1.auc, base: h1.auc_base, ap: h1.ap, apBase: h1.ap_base, auc2: h2.auc, ap2: h2.ap, auc26: t?.auc, base26: t?.auc_base, calibration: cal.map(c => ({ prob: c.prob_media, observed: c.observado, n: c.n })) })
+      const years = ((v.metricas_por_anio as { anio: number; era: string; auc: number; auc_base: number }[] | undefined) ?? [])
+        .filter(y => y.era.startsWith('VIIRS')).map(y => ({ year: y.anio, auc: y.auc, base: y.auc_base }))
+      setVal({ years, calibration: cal.map(c => ({ prob: c.prob_media, observed: c.observado, n: c.n })) })
     }).catch(() => {})
     getGlobalCountries(ctrl.signal).then(c => setCountries(c.paises)).catch(() => {})
     return () => ctrl.abort()
   }, [])
 
   const loaded = series?.key === key ? series.data : undefined
-  const rows = useMemo(() => loaded?.data ?? [], [loaded])
   const isLive = loaded?.escala === 'peninsula_0.5deg'
   const zones = loaded?.zonas.length ?? 0
 
-  // semana elegida = semana del timeline; si el modelo no la tiene, la más cercana disponible
-  const wanted = mondayOf(date)
-  const idx = useMemo(() => {
-    if (!rows.length) return -1
-    const exact = rows.findIndex(r => r.semana === wanted)
-    if (exact >= 0) return exact
-    const before = rows.map(r => r.semana <= wanted).lastIndexOf(true)
-    return before >= 0 ? before : 0
-  }, [rows, wanted])
-  const sel: SeriesRow | undefined = rows[idx]
-  const following: SeriesRow | undefined = rows[idx + 1]
-  const nearest = sel && sel.semana !== wanted ? (sel.semana > wanted ? 'primera semana con pronóstico' : 'última semana con pronóstico') : null
+  // The window of future days: starts one week after the established date and lasts 2 weeks.
+  const windowStart = addDays(anchor, START_AFTER_DAYS)
+  const windowEnd = addDays(windowStart, WINDOW_DAYS - 1)
+  const anchorKey = isoDate(anchor)
+  const range = picked && picked.ref === anchorKey ? picked : { from: windowStart, to: windowEnd }
 
-  const from = Math.max(0, idx - WEEKS_BEFORE)
-  const chartRows = useMemo(() => rows.slice(from, idx + WEEKS_AFTER + 1), [rows, from, idx])
-  const chartHi = idx - from
-
-  const yearPeak = useMemo(() => {
-    if (!sel) return null
-    const y = sel.semana.slice(0, 4)
-    return rows.filter(r => r.semana.startsWith(y) && r.esperadas !== null)
-      .reduce<SeriesRow | null>((m, r) => (m === null || (r.esperadas ?? 0) > (m.esperadas ?? 0) ? r : m), null)
-  }, [rows, sel])
-
-  const auc = useMemo(() => {
-    if (!loaded) return null
-    if (isLive && val) return val.auc26 !== undefined ? { v: val.auc26, base: val.base26 ?? 0.5, scope: 'temporada 2026 en vivo' } : { v: val.auc, base: val.base, scope: 'validado 2015–2025' }
+  // Accuracy of the model that covers this region, relative to the Yucatán model the horizons were measured on.
+  const scale = useMemo(() => {
+    if (!loaded || isLive) return 1
     const cs = countries.filter(c => loaded.paises.includes(c.nombre) && c.auc !== null)
-    if (!cs.length) return null
-    const w = cs.reduce((a, c) => a + c.zonas, 0)
-    const avg = (f: (c: CountryInfo) => number) => cs.reduce((a, c) => a + f(c) * c.zonas, 0) / w
-    return { v: avg(c => c.auc ?? 0), base: avg(c => c.auc_base ?? 0.5), scope: 'repetición 2023–2025' }
-  }, [loaded, isLive, val, countries])
+    if (!cs.length) return 1
+    const avg = cs.reduce((a, c) => a + (c.auc ?? 0), 0) / cs.length
+    return Math.min(1, avg / HORIZONS[0].auc)
+  }, [loaded, isLive, countries])
+
+  // Accuracy by time of the year (Yucatán model); the other model has no seasonal breakdown.
+  const seasonal = useMemo(() => {
+    const m = new Map<number, number>()
+    if (isLive && season?.key === key) for (const w of season.weeks) if (w.auc !== null) m.set(w.semana, w.auc)
+    return m
+  }, [isLive, season, key])
+
+  /** Reliability of a day: seasonal accuracy lowered by the distance to the established date. */
+  const reliabilityAt = (day: Date) => {
+    const ahead = diffDays(anchor, day)
+    const seasonAuc = seasonal.get(isoWeekOf(day).week)
+    return seasonAuc !== undefined ? seasonAuc * (accuracyAhead(ahead) / HORIZONS[0].auc) : accuracyAhead(ahead) * scale
+  }
+  const reliabilityOn = (day: Date) => {
+    const ahead = diffDays(anchor, day)
+    return ahead >= START_AFTER_DAYS + 1 && ahead <= START_AFTER_DAYS + WINDOW_DAYS ? reliabilityAt(day) : null
+  }
+
+  const levelDays = useMemo(() => {
+    const out = { high: [] as Date[], medium: [] as Date[] }
+    for (let i = 0; i < WINDOW_DAYS; i++) {
+      const d = addDays(windowStart, i)
+      const lvl = levelOf(reliabilityAt(d))
+      if (lvl) out[lvl].push(d)
+    }
+    return out
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowStart, scale, seasonal, anchorKey])
+
+  const picks = useMemo(() => {
+    const vals: number[] = []
+    for (let d = range.from, n = 0; d <= range.to && n < 60; d = addDays(d, 1), n++) {
+      const v = reliabilityOn(d)
+      if (v !== null) vals.push(v)
+    }
+    return { avg: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null, days: vals.length }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range.from, range.to, anchorKey, scale])
+
+  // Same weeks of the year in every past year: what the model forecast vs what happened (anomalous zones).
+  const compare = useMemo(() => {
+    const rows: SeriesRow[] = loaded?.data ?? []
+    const weeks = new Set<number>()
+    for (let d = range.from, n = 0; d <= range.to && n < 60; d = addDays(d, 1), n++) weeks.add(isoWeekOf(d).week)
+    const byYear = new Map<number, { f: number; o: number }>()
+    for (const r of rows) {
+      if (r.esperadas === null || r.anomalias === null) continue
+      const iso = isoWeekOf(new Date(`${r.semana}T12:00:00`))
+      if (!weeks.has(iso.week)) continue
+      const e = byYear.get(iso.year) ?? { f: 0, o: 0 }
+      e.f += r.esperadas
+      e.o += r.anomalias
+      byYear.set(iso.year, e)
+    }
+    const years = [...byYear.keys()].sort()
+    const total = years.reduce((a, y) => a + (byYear.get(y)?.o ?? 0), 0)
+    const items = years.map(y => {
+      const e = byYear.get(y)!
+      // baseline = the average of the other years for the same weeks ("what a normal year looks like")
+      const base = years.length > 1 ? (total - e.o) / (years.length - 1) : e.o
+      return { year: y, forecast: e.f, observed: e.o, modelError: Math.abs(e.f - e.o), baselineError: Math.abs(base - e.o) }
+    })
+    const mean = (f: (i: (typeof items)[number]) => number) => (items.length ? items.reduce((a, i) => a + f(i), 0) / items.length : 0)
+    return { items, modelMae: mean(i => i.modelError), baseMae: mean(i => i.baselineError) }
+  }, [loaded, range.from, range.to])
 
   if (!region) return null
-
-  const peak = sel?.prob_max ?? null
-  const alert = alertOf(peak)
-  const ratio = sel && sel.valor !== null && sel.p50 ? sel.valor / sel.p50 : null
   let card = 1 // entrance stagger, after the tabs
 
-  if (loaded === undefined) return <Card index={card++} title="Pronóstico"><div className="skeleton" aria-busy="true">Analizando la región…</div></Card>
-  if (loaded === null) return <Card index={card++} title="Pronóstico"><p className="card-error">No disponible: el motor de pronóstico no responde (levanta el backend en el puerto 5000).</p></Card>
-  if (zones === 0 || !sel) {
+  if (loaded === undefined) return <Card index={card++} title="Predictions"><div className="skeleton" aria-busy="true">Analysing the region…</div></Card>
+  if (loaded === null) return <Card index={card++} title="Predictions"><p className="card-error">Unavailable: the forecast engine is not responding (start the backend on port 5000).</p></Card>
+  if (zones === 0) {
     return (
-      <Card index={card++} title="Pronóstico" note="Cobertura: Península de Yucatán (en vivo, zonas de 0.5°) y México, Brasil, Rusia, Australia, Angola y RD del Congo (zonas de 1°, 2023–2025).">
-        <p className="card-error">Esta región está fuera del área monitoreada. Selecciona una región dentro de la cobertura.</p>
+      <Card index={card++} title="Predictions" note="Coverage: Yucatán Peninsula (live, 0.5° zones) and Mexico, Brazil, Russia, Australia, Angola and DR Congo (1° zones).">
+        <p className="card-error">This region is outside the monitored area. Select a region inside the coverage.</p>
       </Card>
     )
   }
 
+  const level = picks.avg === null ? null : levelOf(picks.avg)
+  const info = level ? LEVELS[level] : null
+  const same = range.from.getTime() === range.to.getTime()
+
   return (
     <>
-      <p className="sensor-note">
-        {isLive ? '● EN VIVO · zonas de ~55 km · NASA FIRMS (VIIRS NOAA-20) + clima NASA POWER' : 'REPLAY 2023–2025 · zonas de ~110 km · NASA FIRMS VIIRS armonizado + clima NASA POWER'} · {zones} zonas · {loaded.paises.join(' · ')}
-      </p>
+      <Card index={card++} title="How reliable is the forecast?">
+        <div className="rel">
+          <div className="rel-result" style={{ ['--lvl' as string]: info?.color ?? '#6b6b6b' }}>
+            <span className="rel-dates">{fmtDay(range.from)}{same ? '' : ` → ${fmtDay(range.to)}`}</span>
+            {picks.avg === null ? (
+              <span className="rel-none">No forecast for these dates.</span>
+            ) : (
+              <>
+                <span className="rel-pct">{Math.round(picks.avg * 100)}<small>%</small></span>
+                <span className="rel-badge">{info ? info.label : 'LOW RELIABILITY'}</span>
+                <span className="rel-text">{info ? info.text : 'Below 50 %: this forecast is not recommended.'}{!same && ` Average of ${picks.days} forecast days.`}</span>
+              </>
+            )}
+          </div>
 
-      <Card index={card++} title={`Pronóstico · semana del ${fmtWeek(sel.semana)}`}
-        note={`${nearest ? `Es la ${nearest}. ` : ''}Anomalía = una zona con más días-fuego que su percentil 90 histórico para esa época. Un punto de calor no es un incendio.`}>
-        <div className="kpis">
-          <Kpi label="Riesgo pico" value={peak === null ? null : peak * 100} decimals={0} unit=" %" color={alert?.color} />
-          <Kpi label="Nivel" text={alert?.key ?? '—'} color={alert?.color} />
-          <Kpi label="Zonas vigiladas" value={zones} />
-          <Kpi label="Zonas esperadas anómalas" value={sel.esperadas} decimals={1} />
-          <Kpi label="Zonas que lo fueron" value={sel.anomalias} text="sin observar" />
-          <Kpi label="Actividad vs típica" value={ratio} decimals={1} unit=" ×" />
+          <Calendar mode="range" weekStartsOn={1} startMonth={windowStart} endMonth={windowEnd}
+            selected={{ from: range.from, to: range.to }} defaultMonth={windowStart}
+            disabled={{ before: windowStart, after: windowEnd }}
+            modifiers={levelDays} modifiersClassNames={{ high: 'rel-high', medium: 'rel-medium' }}
+            className="rel-calendar"
+            onDayClick={day => {
+              // first tap: one day; second tap: the end of a period (in any order)
+              if (!second) { setPicked({ from: day, to: day, ref: anchorKey }); setSecond(true) }
+              else { setPicked(day < range.from ? { from: day, to: range.from, ref: anchorKey } : { from: range.from, to: day, ref: anchorKey }); setSecond(false) }
+            }} />
+
+          <ul className="rel-legend" aria-label="Meaning of the colours">
+            <li><span style={{ background: '#00e676' }} /><b>Green</b> very reliable (over 75 %)</li>
+            <li><span style={{ background: '#ffc400' }} /><b>Yellow</b> medium reliability (over 50 %)</li>
+            <li><span style={{ background: 'transparent', border: '1px solid #777' }} /><b>No colour</b> low reliability or no forecast</li>
+          </ul>
         </div>
       </Card>
 
-      <Card index={card++} title="Perspectiva" note="En vivo el servicio publica la semana en curso (1 semana de anticipación) y la próxima (2 semanas).">
-        <div className="kpis">
-          {isLive && live ? <>
-            <Outlook title="Esta semana" week={live.semana_en_curso.semana} p={live.semana_en_curso.resumen.prob_max} high={live.semana_en_curso.resumen.zonas_alto} />
-            <Outlook title="Próxima semana" week={live.semana_proxima.semana} p={live.semana_proxima.resumen.prob_max} high={live.semana_proxima.resumen.zonas_alto} />
-          </> : <Outlook title={following ? 'Semana siguiente' : 'Semana anterior'} week={(following ?? rows[idx - 1])?.semana} p={(following ?? rows[idx - 1])?.prob_max ?? null} />}
-          <Outlook title={`Pico de ${sel.semana.slice(0, 4)}`} week={yearPeak?.semana} p={yearPeak?.prob_max ?? null} />
-        </div>
-      </Card>
+      {seasonal.size > 0 && (
+        <Card index={card++} title="Reliability through the year" note="Accuracy of the forecast for each week of the year. Green: over 75 %. Yellow: over 50 %. The marked band is the period you selected; this is why some dates are yellow and others green.">
+          <SeasonChart seasonal={seasonal} weeks={[...new Set([range.from, range.to].map(d => isoWeekOf(d).week))]} />
+        </Card>
+      )}
 
-      <Card index={card++} title="Actividad de fuego vs. rango normal">
-        <ActivityChart rows={chartRows} hi={chartHi} />
-        <div className="fd-legend">
-          <span><i className="fd-k-bar" />días-fuego detectados por satélite</span>
-          <span><i className="fd-k-band" />rango normal (típico → máximo estacional)</span>
-        </div>
-      </Card>
+      {compare.items.length > 0 && (
+        <>
+          <Card index={card++} title="Forecast vs. reality" note="Anomalous zones in these same weeks of the year, one pair of bars per past year. The closer the orange bar is to the white one, the better the forecast.">
+            <PairChart items={compare.items.map(i => ({ label: String(i.year), a: i.forecast, b: i.observed }))} aColor="#ff8f00" bColor="#ffffff" unit="zones" />
+            <div className="fd-legend"><span><i style={{ background: '#ff8f00' }} />forecast</span><span><i style={{ background: '#fff' }} />what happened</span></div>
+          </Card>
 
-      <Card index={card++} title="Pronóstico vs. realidad">
-        <ForecastChart rows={chartRows} hi={chartHi} />
-        <div className="fd-legend">
-          <span><i className="fd-k-exp" />zonas pronosticadas como anómalas</span>
-          <span><i className="fd-k-obs" />zonas que fueron anómalas</span>
-        </div>
-      </Card>
+          <Card index={card++} title="Forecast error" note="How far off each estimate was in those weeks. Baseline = guessing a normal year (the average of the other years). Lower is better.">
+            <div className="kpis strong">
+              <Kpi label="Model error" value={compare.modelMae} decimals={1} unit=" zones" color="#00e676" />
+              <Kpi label="Baseline error" value={compare.baseMae} decimals={1} unit=" zones" />
+              <Kpi label="Error reduced by" value={compare.baseMae > 0 ? Math.max(0, (1 - compare.modelMae / compare.baseMae) * 100) : null} decimals={0} unit=" %" color="#00e676" />
+            </div>
+            <PairChart items={compare.items.map(i => ({ label: String(i.year), a: i.modelError, b: i.baselineError }))} aColor="#00e676" bColor="#8a8a8a" unit="zones" />
+            <div className="fd-legend"><span><i style={{ background: '#00e676' }} />model error</span><span><i style={{ background: '#8a8a8a' }} />baseline error</span></div>
+          </Card>
+        </>
+      )}
 
-      <Card index={card++} title="¿Hasta cuándo es confiable?"
-        note="AUC: probabilidad de que el modelo ponga una zona que sí fue anómala por encima de una que no (0.5 = azar). AP: precisión media frente a la de la línea base. El servicio en vivo publica hasta 2 semanas; 4 semanas se validó solo fuera de línea.">
-        <div className="kpis">
-          <Kpi label="Confiable hasta" text="2 semanas" color="#3ccf8e" />
-          <Kpi label="AUC a 1 sem." value={HORIZONS[0].auc} decimals={2} />
-          <Kpi label="AUC a 2 sem." value={HORIZONS[1].auc} decimals={2} />
-          {auc && <Kpi label={`AUC ${auc.scope}`} value={auc.v} decimals={2} unit={` vs ${auc.base.toFixed(2)}`} />}
-          <Kpi label="AP a 1 sem." value={HORIZONS[0].ap / BASE.ap} decimals={1} unit=" × base" />
-          <Kpi label="AP a 4 sem." value={HORIZONS[2].ap / BASE.ap} decimals={1} unit=" × base" />
-        </div>
-        <HorizonChart />
-        <div className="fd-legend">
-          {HORIZONS.map(h => <span key={h.weeks}><i style={{ background: h.color }} />{h.weeks} sem.: {h.verdict}</span>)}
-          <span><i className="fd-k-base" />línea base (promedios históricos)</span>
-        </div>
-      </Card>
+      {val && val.years.length > 0 && (
+        <Card index={card++} title="Why it can be trusted" note="Accuracy of the model (green) against simply using historical averages (grey), year by year. The model stays well above the baseline in every year.">
+          <SkillChart years={val.years} />
+          <div className="fd-legend"><span><i style={{ background: '#00e676' }} />model accuracy</span><span><i className="fd-k-base" />baseline accuracy</span></div>
+        </Card>
+      )}
 
       {val && val.calibration.length > 0 && (
-        <Card index={card++} title="Calibración: lo que dice vs. lo que ocurre" note="Cada par de barras: probabilidad media pronosticada (naranja) frente a la frecuencia observada (blanca). Buena hasta ~40 %; por encima de 70 % el modelo es optimista (muestra pequeña): léelo como «riesgo alto».">
+        <Card index={card++} title="What it says vs. what happens" note="Average forecast probability (orange) against the frequency actually observed (white). Good up to ~40 %; above 70 % the model is optimistic (small sample): read it as “high risk”.">
           <CalibrationChart bins={val.calibration} />
         </Card>
       )}
 
-      <p className="panel-foot">Predice actividad anómala de puntos de calor, no la ubicación de incendios forestales. Solo usa el clima pasado (sin pronóstico meteorológico).</p>
+      <p className="panel-foot">Reliability is the validated accuracy of the model at each distance: how often, out of 100, it ranks a zone with unusual activity above a normal one. It forecasts anomalous hotspot activity, not the location of wildfires.</p>
     </>
   )
 }
 
-function Outlook({ title, week, p, high }: { title: string; week?: string; p: number | null; high?: number }) {
-  const a = alertOf(p)
+const W = 320
+
+const AXIS_H = 120, PAD = { l: 28, r: 6, t: 8, b: 16 }
+
+/** Pairs of bars per label (e.g. forecast vs reality per year). */
+function PairChart({ items, aColor, bColor, unit }: { items: { label: string; a: number; b: number }[]; aColor: string; bColor: string; unit: string }) {
+  const max = Math.max(1, ...items.map(i => Math.max(i.a, i.b)))
+  const bw = (W - PAD.l - PAD.r) / items.length
+  const y = (v: number) => PAD.t + (1 - v / max) * (AXIS_H - PAD.t - PAD.b)
   return (
-    <div className="kpi">
-      <span className="kpi-label">{title}</span>
-      <span className="kpi-value" style={{ color: a?.color }}>{p === null ? '—' : `${Math.round(p * 100)} %`}</span>
-      <span className="kpi-label">{a?.key ?? ''} · {fmtWeek(week)}{high !== undefined ? ` · ${high} zonas altas` : ''}</span>
-    </div>
-  )
-}
-
-const W = 320, H = 120, PAD = { l: 8, r: 8, t: 8, b: 16 }
-
-function useScale(rows: SeriesRow[], f: (r: SeriesRow) => number) {
-  return useMemo(() => {
-    const n = rows.length
-    const max = Math.max(1, ...rows.map(f))
-    const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b
-    const x = (i: number) => PAD.l + (n <= 1 ? 0 : (i / (n - 1)) * iw)
-    const y = (v: number) => PAD.t + ih - (Math.min(v, max) / max) * ih
-    const bw = Math.max(1, iw / Math.max(n, 1) - 0.6)
-    const years = rows.map((r, i) => ({ i, y: r.semana.slice(0, 4), first: i === 0 || r.semana.slice(0, 4) !== rows[i - 1].semana.slice(0, 4) })).filter(t => t.first)
-    return { x, y, bw, max, ih, years }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows])
-}
-
-function Axis({ s, hi }: { s: ReturnType<typeof useScale>; hi: number }) {
-  return <>
-    {[0, 0.5, 1].map(t => <line key={t} x1={PAD.l} x2={W - PAD.r} y1={s.y(s.max * t)} y2={s.y(s.max * t)} className="grid" />)}
-    {s.years.map(t => <text key={t.y} x={s.x(t.i) + 2} y={H - 3} className="axis">{t.y}</text>)}
-    {hi >= 0 && <line x1={s.x(hi)} x2={s.x(hi)} y1={PAD.t} y2={PAD.t + s.ih} className="cursor" />}
-  </>
-}
-
-function ActivityChart({ rows, hi }: { rows: SeriesRow[]; hi: number }) {
-  const s = useScale(rows, r => Math.max(r.valor ?? 0, r.p90 ?? 0))
-  const band = rows.map((r, i) => (r.p90 === null ? null : `${s.x(i).toFixed(1)},${s.y(r.p90).toFixed(1)}`)).filter(Boolean)
-  const low = rows.map((r, i) => (r.p50 === null ? null : `${s.x(i).toFixed(1)},${s.y(r.p50).toFixed(1)}`)).filter(Boolean).reverse()
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Actividad semanal de fuego frente a su rango normal">
-      <Axis s={s} hi={hi} />
-      <polygon className="fd-band area-fill" points={[...band, ...low].join(' ')} />
-      {rows.map((r, i) => {
-        const over = r.valor !== null && r.p90 !== null && r.valor > r.p90
-        return (
-          <rect key={r.semana} className="bar-up" style={{ animationDelay: `${Math.min(i, 60) * 8}ms` }} x={s.x(i) - s.bw / 2} width={s.bw} y={s.y(r.valor ?? 0)} height={Math.max(0, s.y(0) - s.y(r.valor ?? 0))}
-            fill={over ? '#ff8f00' : '#ffd600'} opacity={i === hi ? 1 : over ? 0.95 : 0.6}>
-            <title>{`${fmtWeek(r.semana)}: ${r.valor ?? '—'} días-fuego · típico ${r.p50 ?? '—'} · máximo estacional ${r.p90 ?? '—'}`}</title>
-          </rect>
-        )
-      })}
-    </svg>
-  )
-}
-
-function ForecastChart({ rows, hi }: { rows: SeriesRow[]; hi: number }) {
-  const s = useScale(rows, r => Math.max(r.esperadas ?? 0, r.anomalias ?? 0))
-  const pts = rows.map((r, i) => (r.esperadas === null ? null : `${s.x(i).toFixed(1)},${s.y(r.esperadas).toFixed(1)}`)).filter(Boolean) as string[]
-  const area = pts.length ? `${s.x(0).toFixed(1)},${s.y(0)} ${pts.join(' ')} ${s.x(rows.length - 1).toFixed(1)},${s.y(0)}` : ''
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Zonas anómalas pronosticadas frente a observadas">
-      <defs>
-        <linearGradient id="fd-exp" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#ff8f00" stopOpacity=".7" /><stop offset="1" stopColor="#ff8f00" stopOpacity=".05" /></linearGradient>
-      </defs>
-      <Axis s={s} hi={hi} />
-      <polygon className="area-fill" points={area} fill="url(#fd-exp)" />
-      <polyline className="draw" pathLength={1} points={pts.join(' ')} fill="none" stroke="#ffd54f" strokeWidth="1.6" />
-      {rows.map((r, i) => (r.anomalias ?? 0) > 0
-        ? <circle key={r.semana} className="pop" cx={s.x(i)} cy={s.y(r.anomalias ?? 0)} r={2.4} fill="#e53935" stroke="#fff" strokeWidth=".6">
-            <title>{`${fmtWeek(r.semana)}: pronóstico ≈${r.esperadas ?? '—'} · observado ${r.anomalias}`}</title>
-          </circle>
-        : null)}
-    </svg>
-  )
-}
-
-/** AUC by forecast horizon with the baseline as a reference line. */
-function HorizonChart() {
-  const h = 96, padL = 24, padB = 16, padT = 8
-  const bw = (W - padL - 8) / HORIZONS.length
-  const y = (v: number) => padT + (1 - (v - 0.5) / 0.5) * (h - padT - padB)
-  return (
-    <svg viewBox={`0 0 ${W} ${h}`} role="img" aria-label="AUC por horizonte de pronóstico">
-      {[0.5, 0.75, 1].map(t => <g key={t}><line x1={padL} x2={W - 8} y1={y(t)} y2={y(t)} className="grid" /><text x={padL - 4} y={y(t) + 3} className="axis" textAnchor="end">{t.toFixed(2)}</text></g>)}
-      {HORIZONS.map((hz, i) => (
-        <g key={hz.weeks}>
-          <rect className="bar-up" style={{ animationDelay: `${i * 90}ms` }} x={padL + i * bw + bw * 0.2} width={bw * 0.6} y={y(hz.auc)} height={y(0.5) - y(hz.auc)} rx="3" fill={hz.color}>
-            <title>{`${hz.weeks} semana(s): AUC ${hz.auc.toFixed(2)} · AP ${hz.ap.toFixed(2)} (base ${BASE.ap.toFixed(2)})`}</title>
-          </rect>
-          <text x={padL + i * bw + bw / 2} y={y(hz.auc) - 3} className="axis" textAnchor="middle" fill="#fff">{hz.auc.toFixed(2)}</text>
-          <text x={padL + i * bw + bw / 2} y={h - 3} className="axis" textAnchor="middle">{hz.weeks} sem.</text>
+    <svg viewBox={`0 0 ${W} ${AXIS_H}`} role="img" aria-label="Comparison by year">
+      {[0, 0.5, 1].map(t => <g key={t}><line x1={PAD.l} x2={W - PAD.r} y1={y(max * t)} y2={y(max * t)} className="grid" /><text x={PAD.l - 4} y={y(max * t) + 3} className="axis" textAnchor="end">{Math.round(max * t)}</text></g>)}
+      {items.map((it, i) => (
+        <g key={it.label}>
+          <rect className="bar-up" style={{ animationDelay: `${i * 50}ms` }} x={PAD.l + i * bw + bw * 0.08} width={bw * 0.4} y={y(it.a)} height={y(0) - y(it.a)} rx="2" fill={aColor}><title>{`${it.label}: ${it.a.toFixed(1)} ${unit}`}</title></rect>
+          <rect className="bar-up" style={{ animationDelay: `${i * 50 + 25}ms` }} x={PAD.l + i * bw + bw * 0.52} width={bw * 0.4} y={y(it.b)} height={y(0) - y(it.b)} rx="2" fill={bColor}><title>{`${it.label}: ${it.b.toFixed(1)} ${unit}`}</title></rect>
+          <text x={PAD.l + i * bw + bw / 2} y={AXIS_H - 3} className="axis" textAnchor="middle">{it.label.slice(2)}</text>
         </g>
       ))}
-      <line x1={padL} x2={W - 8} y1={y(BASE.auc)} y2={y(BASE.auc)} stroke="#9a9a9a" strokeWidth="1.2" strokeDasharray="4 3" />
+    </svg>
+  )
+}
+
+/** Model accuracy vs baseline accuracy, year by year. */
+function SkillChart({ years }: { years: { year: number; auc: number; base: number }[] }) {
+  const x = (i: number) => PAD.l + (years.length <= 1 ? 0 : (i / (years.length - 1)) * (W - PAD.l - PAD.r))
+  const y = (v: number) => PAD.t + (1 - (v - 0.5) / 0.5) * (AXIS_H - PAD.t - PAD.b)
+  const model = years.map((p, i) => `${x(i).toFixed(1)},${y(p.auc).toFixed(1)}`)
+  const base = years.map((p, i) => `${x(i).toFixed(1)},${y(p.base).toFixed(1)}`)
+  return (
+    <svg viewBox={`0 0 ${W} ${AXIS_H}`} role="img" aria-label="Model accuracy vs baseline by year">
+      {[0.5, 0.75, 1].map(t => <g key={t}><line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="grid" /><text x={PAD.l - 4} y={y(t) + 3} className="axis" textAnchor="end">{Math.round(t * 100)}%</text></g>)}
+      <polygon className="area-fill" points={[...model, ...[...base].reverse()].join(' ')} fill="#00e676" opacity=".16" />
+      <polyline className="draw" pathLength={1} points={base.join(' ')} fill="none" stroke="#9a9a9a" strokeWidth="1.5" strokeDasharray="1" />
+      <polyline className="draw" pathLength={1} points={model.join(' ')} fill="none" stroke="#00e676" strokeWidth="2" />
+      {years.map((p, i) => <circle key={p.year} className="pop" cx={x(i)} cy={y(p.auc)} r="2.6" fill="#00e676"><title>{`${p.year}: model ${Math.round(p.auc * 100)} % · baseline ${Math.round(p.base * 100)} %`}</title></circle>)}
+      {years.map((p, i) => <text key={p.year} x={x(i)} y={AXIS_H - 3} className="axis" textAnchor="middle">{String(p.year).slice(2)}</text>)}
+    </svg>
+  )
+}
+
+/** Accuracy for each week of the year with the 75 % / 50 % reliability lines and the selected weeks highlighted. */
+function SeasonChart({ seasonal, weeks }: { seasonal: Map<number, number>; weeks: number[] }) {
+  const x = (w: number) => PAD.l + ((w - 1) / 51) * (W - PAD.l - PAD.r)
+  const y = (v: number) => PAD.t + (1 - (v - 0.5) / 0.5) * (AXIS_H - PAD.t - PAD.b)
+  const pts = [...seasonal].sort((a, b) => a[0] - b[0])
+  const line = pts.map(([w, v]) => `${x(w).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+  const lo = Math.min(...weeks), hi = Math.max(...weeks)
+  return (
+    <svg viewBox={`0 0 ${W} ${AXIS_H}`} role="img" aria-label="Reliability by week of the year">
+      {[0.5, 0.75, 1].map(t => <g key={t}><line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} className="grid" /><text x={PAD.l - 4} y={y(t) + 3} className="axis" textAnchor="end">{Math.round(t * 100)}%</text></g>)}
+      <rect x={PAD.l} width={W - PAD.l - PAD.r} y={y(0.75)} height={y(0.5) - y(0.75)} fill="#ffc400" opacity=".1" />
+      <rect x={PAD.l} width={W - PAD.l - PAD.r} y={y(1)} height={y(0.75) - y(1)} fill="#00e676" opacity=".07" />
+      <rect className="step-band" x={x(lo) - 3} width={Math.max(6, x(hi) - x(lo) + 6)} y={PAD.t} height={AXIS_H - PAD.t - PAD.b} />
+      <polyline className="draw" pathLength={1} points={line} fill="none" stroke="#fff" strokeWidth="1.8" />
+      {pts.map(([w, v]) => <circle key={w} cx={x(w)} cy={y(v)} r="1.8" fill={levelOf(v) === 'high' ? '#00e676' : '#ffc400'}><title>{`Week ${w}: ${Math.round(v * 100)} %`}</title></circle>)}
+      {['Jan', 'Apr', 'Jul', 'Oct'].map((m, i) => <text key={m} x={x(1 + i * 13)} y={AXIS_H - 3} className="axis">{m}</text>)}
     </svg>
   )
 }
@@ -307,12 +334,12 @@ function CalibrationChart({ bins }: { bins: { prob: number; observed: number; n:
   const bw = (W - padL - 6) / bins.length
   const y = (v: number) => padT + (1 - v / max) * (h - padT - padB)
   return (
-    <svg viewBox={`0 0 ${W} ${h}`} role="img" aria-label="Probabilidad pronosticada frente a observada">
+    <svg viewBox={`0 0 ${W} ${h}`} role="img" aria-label="Forecast vs. observed probability">
       {[0, 0.5, 1].map(t => <g key={t}><line x1={padL} x2={W - 6} y1={y(max * t)} y2={y(max * t)} className="grid" /><text x={padL - 4} y={y(max * t) + 3} className="axis" textAnchor="end">{Math.round(max * t * 100)}%</text></g>)}
       {bins.map((b, i) => (
         <g key={i}>
-          <rect className="bar-up" style={{ animationDelay: `${i * 60}ms` }} x={padL + i * bw + bw * 0.1} width={bw * 0.38} y={y(b.prob)} height={y(0) - y(b.prob)} rx="2" fill="#ff8f00"><title>{`pronosticado ${(b.prob * 100).toFixed(1)} % · n = ${b.n.toLocaleString('en')}`}</title></rect>
-          <rect className="bar-up" style={{ animationDelay: `${i * 60 + 30}ms` }} x={padL + i * bw + bw * 0.5} width={bw * 0.38} y={y(b.observed)} height={y(0) - y(b.observed)} rx="2" fill="#fff"><title>{`observado ${(b.observed * 100).toFixed(1)} %`}</title></rect>
+          <rect className="bar-up" style={{ animationDelay: `${i * 60}ms` }} x={padL + i * bw + bw * 0.1} width={bw * 0.38} y={y(b.prob)} height={y(0) - y(b.prob)} rx="2" fill="#ff8f00"><title>{`forecast ${(b.prob * 100).toFixed(1)} % · n = ${b.n.toLocaleString('en')}`}</title></rect>
+          <rect className="bar-up" style={{ animationDelay: `${i * 60 + 30}ms` }} x={padL + i * bw + bw * 0.5} width={bw * 0.38} y={y(b.observed)} height={y(0) - y(b.observed)} rx="2" fill="#fff"><title>{`observed ${(b.observed * 100).toFixed(1)} %`}</title></rect>
           <text x={padL + i * bw + bw / 2} y={h - 3} className="axis" textAnchor="middle">{Math.round(b.prob * 100)}%</text>
         </g>
       ))}

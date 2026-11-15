@@ -123,6 +123,25 @@ def get_week(semana: str):
     return jsonify(data)
 
 
+@predictions.get("/predictions/reliability")
+def get_reliability():
+    """
+    Validated accuracy (walk-forward AUC, VIIRS era) of the forecast for each week of the year.
+    ---
+    tags:
+      - Predictions
+    parameters:
+      - {name: lat_min, in: query, type: number}
+      - {name: lat_max, in: query, type: number}
+      - {name: lon_min, in: query, type: number}
+      - {name: lon_max, in: query, type: number}
+    responses:
+      200:
+        description: "por_semana: 52 rows {semana, auc, anomalias, n}; auc is null with too few cases."
+    """
+    return jsonify(svc.get_reliability(current_app.config, _bbox()))
+
+
 @predictions.get("/predictions/series")
 @_doc(DOC_SERIE)
 def get_series():

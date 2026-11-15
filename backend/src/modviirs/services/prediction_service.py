@@ -249,9 +249,20 @@ def actualizar(
 
 
 # ----------------------------------------------------------------- lectura (endpoints)
+def _sin_nan(x):
+    """NaN/Infinity no son JSON valido: el navegador no puede leerlos. Se devuelven como null."""
+    if isinstance(x, float) and not math.isfinite(x):
+        return None
+    if isinstance(x, dict):
+        return {k: _sin_nan(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_sin_nan(v) for v in x]
+    return x
+
+
 @lru_cache(maxsize=8)
 def _leer_json(ruta: str, mtime: float):
-    return json.loads(Path(ruta).read_text())
+    return _sin_nan(json.loads(Path(ruta).read_text()))
 
 
 def _json(ruta: Path):
@@ -444,3 +455,33 @@ def get_series(cfg, bbox=None, start: str = "2015-01-05", end: str | None = None
         "zonas": ids,
         "data": s.to_dict(orient="records"),
     }
+
+
+def get_reliability(cfg, bbox=None) -> dict:
+    """Precision comprobada (AUC walk-forward, era VIIRS) por semana del año en el bbox.
+
+    Cada semana del año usa una ventana de +-2 semanas con todos los años 2015-2025, para que haya
+    suficientes anomalias. `auc` es None cuando la ventana no tiene casos de ambas clases.
+    """
+    from sklearn.metrics import roc_auc_score
+
+    zonas = _zonas(str(data_dir(cfg) / "prediccion" / "zonas.parquet"))
+    ids = [z for z in zonas if _en_bbox(z, zonas, bbox)]
+    ruta = data_dir(cfg) / "prediccion" / "pred_historico.parquet"
+    h = _historico(str(ruta), ruta.stat().st_mtime)
+    h = h[h.era.astype(str).str.startswith("VIIRS") & h.zona_id.isin(ids)]
+    semana = h.semana.dt.isocalendar().week.astype(int)
+    filas = []
+    for w in range(1, 53):
+        ventana = [((w - 1 + k) % 52) + 1 for k in range(-2, 3)]
+        d = h[semana.isin(ventana)]
+        ok = d.anomalia.nunique() == 2
+        filas.append(
+            {
+                "semana": w,
+                "auc": round(float(roc_auc_score(d.anomalia, d.prob)), 4) if ok else None,
+                "anomalias": int(d.anomalia.sum()),
+                "n": int(len(d)),
+            }
+        )
+    return {"escala": "peninsula_0.5deg", "zonas": len(ids), "por_semana": filas}
