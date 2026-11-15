@@ -6,6 +6,10 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 ### Frontend
 
+- La sección de features de `/landing` presenta mapa interactivo, timeline de datos armonizados, análisis de picos y módulo de gráficas. Se añadieron capturas reales del mapa y del control temporal con datos de abril de 2024; las capturas de picos y gráficas se aplazan por indicación del usuario. No se incorporan los cambios remotos del visualizador ni se modifica su lógica.
+- Footer adaptable de la landing con MODVIIRS y marca Orbitron, equipo Astra 11 y NASA, renderizado desde el componente `LandingFooter`. Se reutilizan los logos editados de `frontend/public/images/`, con NASA transparente y Astra 11 recortado.
+- Ruta `/landing` con logo, marca Orbitron y secciones Prompt de armonización, visualizador, predicción y bibliografía. Incluye enlaces a `/map`, contenido provisional centralizado y animaciones de entrada que respetan movimiento reducido. Fondo `@react-bits/Particles-JS-CSS` con los parámetros del usuario, control de pausa y tipos para TypeScript; no añade paquetes npm. La carga de la landing está separada de la del mapa.
+- Los cuatro pasos de armonización de la landing resumen el informe aportado «Armonización MODIS–VIIRS: método, pipeline y uso de los datos»: seis países de estudio, análisis del solapamiento, rejilla de 0.1° con anomalías por sensor y dos capas de salida. Se conserva la advertencia sobre el ajuste pendiente por cambios de constelación. Solo cambia contenido editorial, sin incremento de `VERSION`.
 - Selección de región (campo «Region» sobre «Imagery»): el botón Select oscurece el planeta; un clic/toque fija la primera esquina y otro la opuesta. Entre ambos, el rectángulo se ilumina y sigue al cursor; el resto queda oscuro. Mover el mapa con arrastre no cuenta como clic. Esc o Cancel cancelan; × borra la región. Guarda el cuadro como norte/sur/este/oeste (no cruza el antimeridiano); aún no muestra focos.
 - Selección de países (polígonos Natural Earth 1:50m, `frontend/public/data/countries.geojson`) queda aparcada tras `COUNTRY_SELECTION = false` en `countries.ts`.
 

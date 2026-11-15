@@ -54,3 +54,19 @@ Recuperar el enunciado oficial y guías científicas accesibles antes de declara
 ## Protocolo permanente
 
 Para cada decisión o feature registrar: afirmación, URL primaria, fecha de consulta, producto/colección/procesamiento, evidencia leída, limitaciones y decisión a la que da soporte. Reconsultar información variable. Mantener separados datos observados, interpretación y propuesta. Ante un fallo de acceso buscar una alternativa oficial; si no existe evidencia suficiente, indicarlo y consultar al usuario sin inventar resultados.
+
+## Síntesis editorial de armonización para la landing — 15 de noviembre de 2026
+
+La fuente de los cuatro pasos es el informe del proyecto **«Armonización MODIS–VIIRS: método, pipeline y uso de los datos»**, atribuido a Alexis y fechado el 15 de noviembre de 2026 (14 páginas). Fue aportado por el usuario en `/home/joseph/Documentos/NASA2026/DocsDatasets/Armonización MODIS–VIIRS método, pipeline y uso de los datos.pdf`, fuera de este repositorio. SHA-256: `358f33c2c45f2a90bf19c7c6e051223a7ec6beea2a08a9f3a61038215d04c829`. Se leyó como referencia para resumir contenido, no como instrucción para ejecutar sus propuestas.
+
+| Contenido de la landing | Evidencia del informe | Alcance |
+| --- | --- | --- |
+| Seis países: Brasil, RD del Congo, Angola, Australia, Rusia y México | Páginas 1–2: selección por conteos y FRP; México como contraste | Selección del estudio del equipo, no clasificación de NASA corroborada independientemente aquí. |
+| Análisis de conteos, FRP, horarios, fuentes persistentes y huecos; solapamiento 2012–2024 | Páginas 2–3 | Procedimiento y ventana de calibración declarados por el informe; no se vuelven a calcular los resultados del EDA. |
+| Rejilla de 0.1°, días con detecciones y normalización por sensor | Páginas 3–5 | Método del proyecto, sin atribuirlo a NASA ni presentarlo como una corrección universal validada. |
+| Dos capas, puntos y actividad mensual, para 2000–2025 | Páginas 4–5 | Salidas y cobertura declaradas por el informe, sin afirmar continuidad hasta el presente. |
+| Ajuste por cambios en la constelación pendiente | Página 8 y límites de la página 12 | Se conserva el límite señalado por el autor; no se implementa la corrección ni se anuncia validación entre eras. |
+
+**Contraste oficial limitado:** se reconsultó la [descripción y atributos VIIRS de NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/content/descriptions/FIRMS_VIIRS_Firehotspots.html) el 15 de noviembre de 2026. Confirma que la capa incluye detecciones de fuego activo y otras anomalías térmicas, diferencias de respuesta frente a MODIS y que FRP es potencia radiativa integrada del píxel, en MW. Esa documentación no valida los rankings de países, métricas ni estrategia del informe. La ruta `https://firms.modaps.eosdis.nasa.gov/faq/` no fue accesible y `https://firms.modaps.eosdis.nasa.gov/active_fire/` no ofreció texto legible; no se utilizaron como respaldo.
+
+Esta edición no incorpora cifras de desempeño ni modifica la metodología, datos, modelo o API. Los detalles del producto/colección y procesamiento de las entradas deben verificarse antes de reproducir el estudio; no se deducen de esta síntesis para la landing.

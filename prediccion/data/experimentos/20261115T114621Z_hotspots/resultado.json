@@ -1,0 +1,43 @@
+{
+  "started_utc": "2026-11-15T11:46:21.981912+00:00",
+  "source": "/home/joseph/Documentos/MODVIIRS/backend/data/hotspots_harmonized.parquet",
+  "source_bytes": 2864150576,
+  "source_mtime_ns": 1794704918733843400,
+  "source_rows": 185744988,
+  "climate_source": "/home/joseph/Documentos/MODVIIRS/backend/data/prediccion/power_daily.parquet",
+  "region": {
+    "west": -92.5,
+    "south": 17.8,
+    "east": -86.7,
+    "north": 21.7
+  },
+  "mode": "clima",
+  "horizon_weeks": 1,
+  "type_filter": false,
+  "params": {
+    "max_iter": 200,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 15,
+    "l2_regularization": 1.0,
+    "random_state": 0
+  },
+  "versions": {
+    "pandas": "3.1.1",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.1",
+    "scikit-learn": "1.9.1"
+  },
+  "stages": [
+    {
+      "script": "p00_extraer_peninsula.py",
+      "seconds": 1.92
+    },
+    {
+      "script": "p01_actividad_semanal.py",
+      "seconds": 0.72
+    }
+  ],
+  "status": "failed",
+  "error": "Traceback (most recent call last):\n  File \"/home/joseph/Documentos/MODVIIRS/prediccion/data/experimentos/intento_hotspots.py\", line 54, in <module>\n    runpy.run_path(str(ROOT / 'prediccion/src' / script), run_name='__main__')\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/joseph/Documentos/MODVIIRS/prediccion/src/p02_modelo.py\", line 34, in <module>\n    Z, sem, zonas = cargar_matriz()\n                    ^^^^^^^^^^^^^^^\n  File \"/home/joseph/Documentos/MODVIIRS/prediccion/src/anomalias.py\", line 16, in cargar_matriz\n    Z[~sem.valido.to_numpy()] = np.nan\n    ~^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: assignment destination is read-only\n",
+  "finished_utc": "2026-11-15T11:46:27.198196+00:00"
+}

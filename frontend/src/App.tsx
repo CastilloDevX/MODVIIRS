@@ -1,12 +1,18 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import { MapPage } from './features/map/MapPage'
+
+const MapPage = lazy(() => import('./features/map/MapPage').then(module => ({ default: module.MapPage })))
+const LandingPage = lazy(() => import('./features/landing/LandingPage').then(module => ({ default: module.LandingPage })))
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<h1 className="title">Hola mundo</h1>} />
-      <Route path="/map" element={<MapPage />} />
-      <Route path="*" element={<h1 className="title">404</h1>} />
-    </Routes>
+    <Suspense fallback={<p role="status" style={{ padding: 24 }}>Cargando…</p>}>
+      <Routes>
+        <Route path="/" element={<h1 className="title">Hola mundo</h1>} />
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/map" element={<MapPage />} />
+        <Route path="*" element={<h1 className="title">404</h1>} />
+      </Routes>
+    </Suspense>
   )
 }
