@@ -45,5 +45,6 @@ Flask las carga automáticamente con `app.config.from_prefixed_env(prefix="MODVI
 pip install -e ".[dev]"   # instalar
 pytest                     # tests
 ruff check src/            # linter
-flask --app 'modviirs:create_app()' run --debug   # servidor
+flask --app wsgi run --debug                       # servidor
+gunicorn wsgi:app                                  # producción
 ```
