@@ -2,6 +2,7 @@
 
 from flask import Blueprint, abort, current_app, jsonify, request
 
+from modviirs.services import global_prediction_service as glob
 from modviirs.services import prediction_service as svc
 
 predictions = Blueprint("predictions", __name__)
@@ -51,18 +52,23 @@ DOC_SERIE = f"""
     ---
     tags: [Predictions]
     description: >
-      Aggregates the zones that intersect the bbox week by week (walk-forward 2015-2025 + live
-      2026); without bbox = whole peninsula. For charts: prob_max/prob_media vs anomalias,
-      valor vs p90.
+      Aggregates the zones that intersect the bbox week by week. `escala=auto` (default) uses
+      the Yucatan Peninsula model (0.5 deg zones, NASA POWER climate, walk-forward 2015-2025 +
+      live 2026) when >= 50 % of the bbox lies in the peninsula, otherwise the 6-country model
+      (Mexico, Brazil, Russia, Australia, Angola, DR Congo; 1 deg zones, walk-forward
+      2023-2025). Without bbox = whole peninsula. `esperadas` = expected number of anomalous
+      zones (sum of probabilities), compare it with `anomalias` (observed).
     parameters:{BBOX}
+      - {{name: escala, in: query, type: string, required: false, enum: [auto, peninsula, global]}}
       - {{name: start, in: query, type: string, required: false, description: "Monday"}}
       - {{name: end, in: query, type: string, required: false}}
     responses:
       200:
         description: >
-          zonas (ids) and data: [{{semana, fuente, zonas, prob_max, prob_media, zonas_alto,
-          valor, p90, anomalias}}]. valor/p90 = summed fire-days; anomalias = zones with
-          observed anomaly (null if not observed yet).
+          escala, tam_zona_grados, paises, zonas (ids) and data: [{{semana, fuente, zonas,
+          prob_max, prob_media, esperadas, zonas_alto, valor, p50, p90, anomalias}}].
+          valor/p50/p90 = summed fire-days; anomalias = zones with observed anomaly (null if
+          not observed yet).
     """
 
 
@@ -120,14 +126,78 @@ def get_week(semana: str):
 @predictions.get("/predictions/series")
 @_doc(DOC_SERIE)
 def get_series():
-    return jsonify(
-        svc.get_series(
-            current_app.config,
-            _bbox(),
-            request.args.get("start", "2015-01-05"),
-            request.args.get("end"),
-        )
+    bbox, escala = _bbox(), request.args.get("escala", "auto")
+    start, end = request.args.get("start"), request.args.get("end")
+    usar_global = glob.disponible(current_app.config) and (
+        escala == "global" or (escala == "auto" and not glob.usa_peninsula(bbox))
     )
+    if usar_global:
+        return jsonify(glob.get_series(current_app.config, bbox, start or "2023-01-02", end))
+    return jsonify(svc.get_series(current_app.config, bbox, start or "2015-01-05", end))
+
+
+def _global_o_503():
+    if not glob.disponible(current_app.config):
+        abort(503, description="Falta data/prediccion/pred_global.parquet (correr p06 + p07).")
+
+
+@predictions.get("/predictions/global/countries")
+def get_global_countries():
+    """
+    Countries covered by the 6-country model (Alexis' harmonized VIIRS data).
+    ---
+    tags: [Predictions]
+    description: >
+      Mexico, Brazil, Russia, Australia, Angola and DR Congo with 1 deg zones (~110 km).
+      Per country: zones, bbox {west, south, east, north} and walk-forward H1 metrics
+      (AUC / average precision vs the climatology baseline).
+    responses:
+      200: {description: "paises, semanas {desde, hasta}, aviso"}
+    """
+    _global_o_503()
+    return jsonify(glob.paises(current_app.config))
+
+
+@predictions.get("/predictions/global/week/<semana>")
+def get_global_week(semana: str):
+    """
+    6-country forecast for one week as GeoJSON (1 deg zones, map layer).
+    ---
+    tags: [Predictions]
+    parameters:
+      - {name: semana, in: path, type: string, required: true, description: "Monday"}
+      - {name: horizonte, in: query, type: integer, required: false, enum: [1, 2]}
+      - {name: lat_min, in: query, type: number, required: false}
+      - {name: lat_max, in: query, type: number, required: false}
+      - {name: lon_min, in: query, type: number, required: false}
+      - {name: lon_max, in: query, type: number, required: false}
+    responses:
+      200: {description: "FeatureCollection (props: zona_id, pais, prob, nivel, base, p50, p90,
+        valor, anomalia) + resumen {zonas, prob_max, zonas_alto, esperadas}"}
+      404: {description: "No forecast for that week (available 2023-2025)"}
+    """
+    _global_o_503()
+    data = glob.get_week(
+        current_app.config, semana, _bbox(), int(request.args.get("horizonte", 1))
+    )
+    if data is None:
+        abort(404, description=f"No hay prediccion global para la semana {semana}.")
+    return jsonify(data)
+
+
+@predictions.get("/predictions/global/validation")
+def get_global_validation():
+    """
+    Walk-forward metrics of the 6-country model, per country and year.
+    ---
+    tags: [Predictions]
+    responses:
+      200: {description: "por_pais, por_pais_anio (auc, ap, brier and their *_base)"}
+    """
+    _global_o_503()
+    from modviirs.services.prediction_service import _json, data_dir
+
+    return jsonify(_json(data_dir(current_app.config) / "prediccion" / "validacion_global.json"))
 
 
 @predictions.get("/predictions/validation")

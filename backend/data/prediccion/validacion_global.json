@@ -1,0 +1,296 @@
+{
+  "descripcion": "Walk-forward H1 por pais (entrena con anios < anio de prueba). Zonas de 1 grado, VIIRS armonizado (Alexis), con clima NASA POWER.",
+  "anios_prueba": [
+    2023,
+    2024,
+    2025
+  ],
+  "por_pais_anio": [
+    {
+      "pais": "Angola",
+      "anio": 2023,
+      "n": 7124,
+      "anomalias": 624,
+      "auc": 0.8587,
+      "ap": 0.4323,
+      "brier": 0.064,
+      "auc_base": 0.5483,
+      "ap_base": 0.1025,
+      "brier_base": 0.1049
+    },
+    {
+      "pais": "Angola",
+      "anio": 2024,
+      "n": 7261,
+      "anomalias": 793,
+      "auc": 0.8412,
+      "ap": 0.5022,
+      "brier": 0.0747,
+      "auc_base": 0.5504,
+      "ap_base": 0.1267,
+      "brier_base": 0.1152
+    },
+    {
+      "pais": "Angola",
+      "anio": 2025,
+      "n": 6987,
+      "anomalias": 379,
+      "auc": 0.8244,
+      "ap": 0.2242,
+      "brier": 0.0468,
+      "auc_base": 0.5627,
+      "ap_base": 0.0641,
+      "brier_base": 0.0701
+    },
+    {
+      "pais": "Australia",
+      "anio": 2023,
+      "n": 39104,
+      "anomalias": 3531,
+      "auc": 0.8508,
+      "ap": 0.4511,
+      "brier": 0.0641,
+      "auc_base": 0.556,
+      "ap_base": 0.1086,
+      "brier_base": 0.1038
+    },
+    {
+      "pais": "Australia",
+      "anio": 2024,
+      "n": 39856,
+      "anomalias": 2387,
+      "auc": 0.857,
+      "ap": 0.3363,
+      "brier": 0.0469,
+      "auc_base": 0.5966,
+      "ap_base": 0.0831,
+      "brier_base": 0.0723
+    },
+    {
+      "pais": "Australia",
+      "anio": 2025,
+      "n": 38352,
+      "anomalias": 2677,
+      "auc": 0.8401,
+      "ap": 0.3419,
+      "brier": 0.0547,
+      "auc_base": 0.5862,
+      "ap_base": 0.0922,
+      "brier_base": 0.0762
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2023,
+      "n": 40456,
+      "anomalias": 4910,
+      "auc": 0.8335,
+      "ap": 0.4153,
+      "brier": 0.087,
+      "auc_base": 0.5408,
+      "ap_base": 0.133,
+      "brier_base": 0.1611
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2024,
+      "n": 41234,
+      "anomalias": 3478,
+      "auc": 0.819,
+      "ap": 0.3442,
+      "brier": 0.0658,
+      "auc_base": 0.5253,
+      "ap_base": 0.0877,
+      "brier_base": 0.1175
+    },
+    {
+      "pais": "Brazil",
+      "anio": 2025,
+      "n": 39678,
+      "anomalias": 1806,
+      "auc": 0.8267,
+      "ap": 0.236,
+      "brier": 0.0391,
+      "auc_base": 0.5904,
+      "ap_base": 0.0609,
+      "brier_base": 0.0712
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2023,
+      "n": 12220,
+      "anomalias": 1136,
+      "auc": 0.7252,
+      "ap": 0.2028,
+      "brier": 0.0798,
+      "auc_base": 0.5292,
+      "ap_base": 0.0998,
+      "brier_base": 0.1232
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2024,
+      "n": 12455,
+      "anomalias": 1494,
+      "auc": 0.7242,
+      "ap": 0.2671,
+      "brier": 0.0979,
+      "auc_base": 0.514,
+      "ap_base": 0.1233,
+      "brier_base": 0.1343
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "anio": 2025,
+      "n": 11985,
+      "anomalias": 947,
+      "auc": 0.7266,
+      "ap": 0.2231,
+      "brier": 0.0681,
+      "auc_base": 0.5509,
+      "ap_base": 0.0899,
+      "brier_base": 0.0923
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2023,
+      "n": 12116,
+      "anomalias": 1050,
+      "auc": 0.844,
+      "ap": 0.3545,
+      "brier": 0.0659,
+      "auc_base": 0.5264,
+      "ap_base": 0.0936,
+      "brier_base": 0.1255
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2024,
+      "n": 12349,
+      "anomalias": 649,
+      "auc": 0.8576,
+      "ap": 0.3267,
+      "brier": 0.0419,
+      "auc_base": 0.5468,
+      "ap_base": 0.0586,
+      "brier_base": 0.0785
+    },
+    {
+      "pais": "Mexico",
+      "anio": 2025,
+      "n": 11883,
+      "anomalias": 729,
+      "auc": 0.8504,
+      "ap": 0.3467,
+      "brier": 0.0479,
+      "auc_base": 0.5853,
+      "ap_base": 0.0855,
+      "brier_base": 0.0711
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2023,
+      "n": 123916,
+      "anomalias": 3691,
+      "auc": 0.9353,
+      "ap": 0.4157,
+      "brier": 0.0215,
+      "auc_base": 0.6,
+      "ap_base": 0.0597,
+      "brier_base": 0.0381
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2024,
+      "n": 126299,
+      "anomalias": 3593,
+      "auc": 0.9497,
+      "ap": 0.5005,
+      "brier": 0.0188,
+      "auc_base": 0.5967,
+      "ap_base": 0.0503,
+      "brier_base": 0.0347
+    },
+    {
+      "pais": "Russian_Federation",
+      "anio": 2025,
+      "n": 121533,
+      "anomalias": 2678,
+      "auc": 0.9386,
+      "ap": 0.4217,
+      "brier": 0.0159,
+      "auc_base": 0.633,
+      "ap_base": 0.0541,
+      "brier_base": 0.0267
+    }
+  ],
+  "por_pais": [
+    {
+      "pais": "Angola",
+      "auc": 0.8414,
+      "ap": 0.3862,
+      "brier": 0.0618,
+      "auc_base": 0.5538,
+      "ap_base": 0.0978,
+      "brier_base": 0.0967
+    },
+    {
+      "pais": "Australia",
+      "auc": 0.8493,
+      "ap": 0.3764,
+      "brier": 0.0553,
+      "auc_base": 0.5796,
+      "ap_base": 0.0946,
+      "brier_base": 0.0841
+    },
+    {
+      "pais": "Brazil",
+      "auc": 0.8264,
+      "ap": 0.3319,
+      "brier": 0.064,
+      "auc_base": 0.5522,
+      "ap_base": 0.0939,
+      "brier_base": 0.1166
+    },
+    {
+      "pais": "Democratic_Republic_of_the_Congo",
+      "auc": 0.7253,
+      "ap": 0.231,
+      "brier": 0.0819,
+      "auc_base": 0.5314,
+      "ap_base": 0.1044,
+      "brier_base": 0.1166
+    },
+    {
+      "pais": "Mexico",
+      "auc": 0.8507,
+      "ap": 0.3426,
+      "brier": 0.0519,
+      "auc_base": 0.5528,
+      "ap_base": 0.0792,
+      "brier_base": 0.0917
+    },
+    {
+      "pais": "Russian_Federation",
+      "auc": 0.9412,
+      "ap": 0.446,
+      "brier": 0.0187,
+      "auc_base": 0.6099,
+      "ap_base": 0.0547,
+      "brier_base": 0.0332
+    }
+  ],
+  "clima_nasa_power": true,
+  "comparacion_clima": {
+    "descripcion": "Mismo modelo con y sin variables NASA POWER (lluvia 30/90 d, anomalia de lluvia 90 d, dias sin lluvia, humedad, Tmax, viento), 18 pares pais-anio walk-forward H1.",
+    "auc_sin_clima": 0.8334,
+    "auc_con_clima": 0.8391,
+    "ap_sin_clima": 0.3411,
+    "ap_con_clima": 0.3524,
+    "brier_sin_clima": 0.0562,
+    "brier_con_clima": 0.0556,
+    "pares_mejora_auc": "18/18",
+    "wilcoxon_p_auc": 0.00019438312233538687,
+    "pares_mejora_ap": "15/18",
+    "wilcoxon_p_ap": 0.00157928466796875
+  }
+}

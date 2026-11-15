@@ -394,7 +394,7 @@ def _tabla_larga(cfg) -> pd.DataFrame:
     """Historico walk-forward + vivo 2026 en una sola tabla zona x semana."""
     ruta = data_dir(cfg) / "prediccion" / "pred_historico.parquet"
     h = _historico(str(ruta), ruta.stat().st_mtime)[
-        ["zona_id", "semana", "prob", "base", "valor", "p90", "anomalia"]
+        ["zona_id", "semana", "prob", "base", "valor", "p50", "p90", "anomalia"]
     ].assign(fuente="historico")
     actual = _json(cache_dir(cfg) / "prediccion_actual.json")
     if actual:
@@ -406,7 +406,7 @@ def _tabla_larga(cfg) -> pd.DataFrame:
             ]
         )
         if len(vivo):
-            vivo = vivo[["zona_id", "semana", "prob", "base", "valor", "p90", "anomalia"]]
+            vivo = vivo[["zona_id", "semana", "prob", "base", "valor", "p50", "p90", "anomalia"]]
             h = pd.concat([h[~h.semana.isin(vivo.semana)], vivo.assign(fuente="vivo")])
     return h
 
@@ -427,12 +427,20 @@ def get_series(cfg, bbox=None, start: str = "2015-01-05", end: str | None = None
             "zonas": g.zona_id.size(),
             "prob_max": g.prob.max().round(3),
             "prob_media": g.prob.mean().round(3),
+            "esperadas": g.prob.sum().round(2),
             "zonas_alto": g.alto.sum(),
             "valor": g.valor.sum(min_count=1).round(1),
+            "p50": g.p50.sum(min_count=1).round(1),
             "p90": g.p90.sum(min_count=1).round(1),
             "anomalias": g.anomalia.sum(min_count=1),
         }
     ).reset_index()
     s["semana"] = s.semana.dt.strftime("%Y-%m-%d")
     s = s.astype(object).where(s.notna(), None)
-    return {"zonas": ids, "data": s.to_dict(orient="records")}
+    return {
+        "escala": "peninsula_0.5deg",
+        "tam_zona_grados": TAM_ZONA,
+        "paises": ["México (Península de Yucatán)"],
+        "zonas": ids,
+        "data": s.to_dict(orient="records"),
+    }

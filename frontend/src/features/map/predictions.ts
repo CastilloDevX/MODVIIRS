@@ -53,11 +53,32 @@ export type SeriesRow = {
   prob_max: number | null
   prob_media: number | null
   zonas_alto: number
+  /** expected number of anomalous zones = sum of zone probabilities */
+  esperadas: number | null
   valor: number | null
+  p50: number | null
   p90: number | null
   anomalias: number | null
 }
-export type ForecastSeries = { zonas: number[]; data: SeriesRow[] }
+export type ForecastSeries = {
+  /** 'peninsula_0.5deg' (Yucatán, NASA POWER climate, live 2026) or 'global_1deg' (6 countries, 2023–2025) */
+  escala: 'peninsula_0.5deg' | 'global_1deg'
+  tam_zona_grados: number
+  paises: string[]
+  zonas: number[]
+  data: SeriesRow[]
+}
+export type CountryInfo = {
+  pais: string
+  nombre: string
+  zonas: number
+  bbox: Bbox
+  auc: number | null
+  auc_base: number | null
+  ap: number | null
+  ap_base: number | null
+}
+export type GlobalCountries = { paises: CountryInfo[]; semanas: { desde: string; hasta: string }; aviso: string }
 
 const bboxQuery = (b?: Bbox | null) =>
   b ? `lat_min=${b.south}&lat_max=${b.north}&lon_min=${b.west}&lon_max=${b.east}` : ''
@@ -66,12 +87,28 @@ export const getCurrentForecast = (signal: AbortSignal, bbox?: Bbox | null) =>
   getJson<CurrentForecast>(`/predictions?${bboxQuery(bbox)}`, '/current.json', signal)
 export const getWeekForecast = (week: string, signal: AbortSignal, bbox?: Bbox | null) =>
   getJson<ZoneCollection>(`/predictions/week/${week}?${bboxQuery(bbox)}`, `/week/${week}.json`, signal)
-/** Weekly series for a selected area (dashboard). API only (no static fallback for arbitrary areas). */
-export async function getForecastSeries(bbox: Bbox | null, signal: AbortSignal, start = '2015-01-05', end?: string) {
-  const q = `${bboxQuery(bbox)}&start=${start}${end ? `&end=${end}` : ''}`
+/**
+ * Weekly series for a selected area (dashboard). API only (no static fallback for arbitrary areas).
+ * The backend picks the model: Yucatán Peninsula (0.5°, live 2026, from 2015) when >= 50 % of the bbox
+ * is inside it, otherwise the 6-country model (1°, 2023–2025). Without `start` each model returns its full range.
+ */
+export async function getForecastSeries(bbox: Bbox | null, signal: AbortSignal, start?: string, end?: string) {
+  const q = `${bboxQuery(bbox)}${start ? `&start=${start}` : ''}${end ? `&end=${end}` : ''}`
   const r = await fetch(`${API}/predictions/series?${q}`, { signal })
   if (!r.ok) throw new Error(`/predictions/series ${r.status}`)
   return (await r.json()) as ForecastSeries
+}
+/** Countries of the 6-country model (Mexico, Brazil, Russia, Australia, Angola, DR Congo) + metrics. */
+export async function getGlobalCountries(signal: AbortSignal) {
+  const r = await fetch(`${API}/predictions/global/countries`, { signal })
+  if (!r.ok) throw new Error(`/predictions/global/countries ${r.status}`)
+  return (await r.json()) as GlobalCountries
+}
+/** 6-country forecast for one week as GeoJSON (1° zones); available 2023–2025. */
+export async function getGlobalWeekForecast(week: string, signal: AbortSignal, bbox?: Bbox | null, horizon: 1 | 2 = 1) {
+  const r = await fetch(`${API}/predictions/global/week/${week}?horizonte=${horizon}&${bboxQuery(bbox)}`, { signal })
+  if (!r.ok) return null
+  return (await r.json()) as ZoneCollection
 }
 export async function getForecastValidation(signal: AbortSignal) {
   const r = await fetch(`${API}/predictions/validation`, { signal })

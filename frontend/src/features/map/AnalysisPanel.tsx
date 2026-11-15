@@ -1,10 +1,11 @@
-import { useMemo, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { QueryState } from '../../lib/useFireQuery'
 import type { CalendarResponse, MediansResponse, PointsResponse, SensorGroup, TimelineResponse } from '../../lib/types'
 import { AreaChart, BandChart, BarList, Card, CountUp, Donut, Heatmap, Histogram } from './charts'
 import { addDays, formatLong } from './dates'
+import { ForecastDashboard } from './ForecastDashboard'
 import type { Bbox } from './region'
 import { boxAreaKm2, denseSeries, pointStats, rangeStats } from './stats'
 import './analysis.css'
@@ -48,6 +49,7 @@ export function AnalysisPanel({ region, start, end, days, sensor, onSensorChange
   const hot = useMemo(() => denseSeries(rows, start, days, 'n_hotspots'), [rows, start, days])
   const frp = useMemo(() => denseSeries(rows, start, days, 'frp_sum'), [rows, start, days])
   const ps = useMemo(() => (points ? pointStats(points.data) : null), [points])
+  const [view, setView] = useState<'historico' | 'pronostico'>('historico')
   const dateAt = (i: number) => formatLong(addDays(start, i))
   const labels: [string, string] = [formatLong(start), formatLong(end)]
   let card = 0
@@ -61,6 +63,16 @@ export function AnalysisPanel({ region, start, end, days, sensor, onSensorChange
         </div>
         <Button type="button" variant="ghost" size="sm" onClick={onClose} aria-label="Ocultar panel de análisis">Ocultar ›</Button>
       </header>
+
+      <div className="analysis-tabs" role="group" aria-label="Vista del panel">
+        <button type="button" aria-pressed={view === 'historico'} onClick={() => setView('historico')}>HISTÓRICO</button>
+        <button type="button" className="is-forecast" aria-pressed={view === 'pronostico'} onClick={() => setView('pronostico')}>PRONÓSTICO ✦</button>
+      </div>
+
+      {/* Modelo predictivo (rama predictivo): semana del cursor del timeline */}
+      {view === 'pronostico' && <ForecastDashboard region={region} date={addDays(start, stepFrom)} embedded />}
+
+      {view === 'historico' && <>
 
       <div className="sensor-row">
         <span>Sensor (serie, calendario y estacionalidad)</span>
@@ -134,6 +146,7 @@ export function AnalysisPanel({ region, start, end, days, sensor, onSensorChange
       </Card>
 
       <p className="panel-foot">Métrica de calendario y estacionalidad: días-con-fuego por celda de 0.1°, no conteo de hotspots. Cero detecciones no confirma ausencia de fuego (nubes, humo, huecos de sensor).</p>
+      </>}
     </aside>
   )
 }
