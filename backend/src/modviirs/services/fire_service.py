@@ -36,9 +36,7 @@ def get_points(
 ):
     bbox = (lat_min, lat_max, lon_min, lon_max)
     df, truncated = Q.aoi_points(bbox, start, end, **filters)
-    records = df.with_columns(
-        pl.col("acq_date_d").dt.to_string("%Y-%m-%d")
-    ).to_dicts()
+    records = df.with_columns(pl.col("acq_date_d").dt.to_string("%Y-%m-%d")).to_dicts()
     return records, truncated
 
 

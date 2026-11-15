@@ -38,9 +38,7 @@ def _parse_point_filters():
     if "frp_comparable" in request.args:
         filters["frp_comparable"] = request.args["frp_comparable"].lower() == "true"
     if "exclude_persistent" in request.args:
-        filters["exclude_persistent"] = (
-            request.args["exclude_persistent"].lower() == "true"
-        )
+        filters["exclude_persistent"] = request.args["exclude_persistent"].lower() == "true"
     return filters
 
 
@@ -76,7 +74,8 @@ def get_calendar():
         description: "Sensor group (VIIRS or MODIS)."
     responses:
       200:
-        description: Monthly fire counts per year with anomaly statistics against the historical baseline.
+        description: >-
+          Monthly fire counts per year with anomaly statistics against the historical baseline.
         schema:
           type: object
           properties:
@@ -98,30 +97,48 @@ def get_calendar():
                     example: 6
                   afd:
                     type: integer
-                    description: "Active Fire Days: number of cell-days with at least one hotspot detection in the AOI. Range: ≥ 0."
+                    description: >-
+                      Active Fire Days: number of cell-days with at least one hotspot detection
+                      in the AOI. Range: ≥ 0.
                     example: 143729
                   valid:
                     type: boolean
-                    description: "False for known data-gap months (e.g. VIIRS 2022-07/08). Skip these cells in visualizations."
+                    description: >-
+                      False for known data-gap months (e.g. VIIRS 2022-07/08). Skip these cells
+                      in visualizations.
                   mean:
                     type: number
-                    description: "Historical mean of afd for this month across baseline years. Range: ≥ 0."
+                    description: >-
+                      Historical mean of afd for this month across baseline years. Range: ≥ 0.
                   std:
                     type: number
-                    description: "Historical standard deviation of afd for this month. Range: ≥ 0. Use as error band width."
+                    description: >-
+                      Historical standard deviation of afd for this month. Range: ≥ 0. Use as
+                      error band width.
                   p50:
                     type: number
-                    description: "Historical median of afd for this month. Range: ≥ 0. More robust than mean for skewed distributions."
+                    description: >-
+                      Historical median of afd for this month. Range: ≥ 0. More robust than mean
+                      for skewed distributions.
                   n_base:
                     type: integer
-                    description: "Number of years in the climatological baseline (typically 12–13). Lower values reduce reliability."
+                    description: >-
+                      Number of years in the climatological baseline (typically 12–13). Lower
+                      values reduce reliability.
                   z:
                     type: number
-                    description: "Z-score: (afd − mean) / std. Null when valid=false or std=0. Typical range: −3 to +3. RECOMMENDED FOR DIVERGING COLOR RAMP — negative (blue) = below average, positive (red) = above average, zero = climatological normal."
+                    description: >-
+                      Z-score: (afd − mean) / std. Null when valid=false or std=0. Typical
+                      range: −3 to +3. RECOMMENDED FOR DIVERGING COLOR RAMP — negative (blue) =
+                      below average, positive (red) = above average, zero = climatological
+                      normal.
                     example: -1.06
                   pctl:
                     type: number
-                    description: "Percentile rank of afd within baseline years for the same month. Range: 0–1 (null when valid=false). RECOMMENDED FOR SEQUENTIAL COLOR RAMP — 0 = lowest on record, 1 = highest on record."
+                    description: >-
+                      Percentile rank of afd within baseline years for the same month. Range:
+                      0–1 (null when valid=false). RECOMMENDED FOR SEQUENTIAL COLOR RAMP — 0 =
+                      lowest on record, 1 = highest on record.
                     example: 0.23
       400:
         description: Missing or invalid bbox parameters.
@@ -167,7 +184,10 @@ def get_medians():
         description: "Sensor group (VIIRS or MODIS)."
     responses:
       200:
-        description: "12 rows (one per calendar month) summarizing the historical distribution of fire activity. Use to build a seasonality reference chart: median as the center line, p25/p75 as the IQR band, min/max as the full range."
+        description: >-
+          12 rows (one per calendar month) summarizing the historical distribution of fire
+          activity. Use to build a seasonality reference chart: median as the center line,
+          p25/p75 as the IQR band, min/max as the full range.
         schema:
           type: object
           properties:
@@ -185,13 +205,17 @@ def get_medians():
                     example: 6
                   median:
                     type: number
-                    description: "Historical median of monthly afd across baseline years. Use as the center reference line in seasonality charts."
+                    description: >-
+                      Historical median of monthly afd across baseline years. Use as the center
+                      reference line in seasonality charts.
                   p25:
                     type: number
-                    description: "25th percentile of monthly afd. Use as the lower bound of the IQR band."
+                    description: >-
+                      25th percentile of monthly afd. Use as the lower bound of the IQR band.
                   p75:
                     type: number
-                    description: "75th percentile of monthly afd. Use as the upper bound of the IQR band."
+                    description: >-
+                      75th percentile of monthly afd. Use as the upper bound of the IQR band.
                   mean:
                     type: number
                     description: "Historical mean of monthly afd."
@@ -200,16 +224,22 @@ def get_medians():
                     description: "Standard deviation of monthly afd. Use as error bar half-width."
                   min:
                     type: number
-                    description: "Lowest monthly afd ever recorded in the baseline. Use as the absolute floor of the range band."
+                    description: >-
+                      Lowest monthly afd ever recorded in the baseline. Use as the absolute
+                      floor of the range band.
                   max:
                     type: number
-                    description: "Highest monthly afd ever recorded in the baseline. Use as the absolute ceiling of the range band."
+                    description: >-
+                      Highest monthly afd ever recorded in the baseline. Use as the absolute
+                      ceiling of the range band.
                   n_years:
                     type: integer
                     description: "Number of valid years in the baseline for this month."
                   baseline_corto:
                     type: boolean
-                    description: "True when n_years < 8. Show a visual warning — statistics are less reliable."
+                    description: >-
+                      True when n_years < 8. Show a visual warning — statistics are less
+                      reliable.
       400:
         description: Missing or invalid bbox parameters.
     """
@@ -266,7 +296,10 @@ def get_timeline():
         description: "Sensor group (VIIRS or MODIS)."
     responses:
       200:
-        description: "Day-by-day fire activity series. Each row is one day with three complementary intensity signals: spatial spread (cells_active), detection count (n_hotspots), and radiative energy (frp_sum)."
+        description: >-
+          Day-by-day fire activity series. Each row is one day with three complementary
+          intensity signals: spatial spread (cells_active), detection count (n_hotspots), and
+          radiative energy (frp_sum).
         schema:
           type: object
           properties:
@@ -290,13 +323,20 @@ def get_timeline():
                     example: "2024-06-15"
                   cells_active:
                     type: integer
-                    description: "Number of distinct 0.1° grid cells with fire activity. Reflects spatial spread. Range: ≥ 0."
+                    description: >-
+                      Number of distinct 0.1° grid cells with fire activity. Reflects spatial
+                      spread. Range: ≥ 0.
                   n_hotspots:
                     type: integer
-                    description: "Total raw hotspot detections (satellite passes × fires). Higher than cells_active when multiple satellites overpass the same cell. Range: ≥ 0."
+                    description: >-
+                      Total raw hotspot detections (satellite passes × fires). Higher than
+                      cells_active when multiple satellites overpass the same cell. Range: ≥ 0.
                   frp_sum:
                     type: number
-                    description: "Sum of Fire Radiative Power (MW) for all hotspots that day. Best proxy for total fire energy. Range: ≥ 0 MW. RECOMMENDED FOR LINE CHART COLOR/FILL INTENSITY."
+                    description: >-
+                      Sum of Fire Radiative Power (MW) for all hotspots that day. Best proxy for
+                      total fire energy. Range: ≥ 0 MW. RECOMMENDED FOR LINE CHART COLOR/FILL
+                      INTENSITY.
       400:
         description: Missing or invalid parameters.
     """
@@ -375,7 +415,9 @@ def get_points():
         description: "Exclude persistent hotspot detections."
     responses:
       200:
-        description: "Individual hotspot detections. Each row is one satellite observation of a fire. Cap: 50 000 records (check truncated flag). For the full dataset use /fires/points.csv."
+        description: >-
+          Individual hotspot detections. Each row is one satellite observation of a fire. Cap:
+          50 000 records (check truncated flag). For the full dataset use /fires/points.csv.
         schema:
           type: object
           properties:
@@ -384,7 +426,9 @@ def get_points():
               description: "Number of records returned (≤ 50 000)."
             truncated:
               type: boolean
-              description: "True when the result was cut at 50 000 rows. Use /fires/points.csv to get the full dataset."
+              description: >-
+                True when the result was cut at 50 000 rows. Use /fires/points.csv to get the
+                full dataset.
             data:
               type: array
               items:
@@ -398,31 +442,49 @@ def get_points():
                     description: "Hotspot longitude (−180 to 180). Use as map X coordinate."
                   acq_date_d:
                     type: string
-                    description: "Acquisition date (YYYY-MM-DD). Use for temporal filtering or animation."
+                    description: >-
+                      Acquisition date (YYYY-MM-DD). Use for temporal filtering or animation.
                     example: "2024-06-15"
                   frp:
                     type: number
-                    description: "Fire Radiative Power in MW. Range: ≥ 0. RECOMMENDED FOR POINT COLOR RAMP — higher values = more intense fire. Suggested scale: 0–500 MW with logarithmic normalization."
+                    description: >-
+                      Fire Radiative Power in MW. Range: ≥ 0. RECOMMENDED FOR POINT COLOR RAMP —
+                      higher values = more intense fire. Suggested scale: 0–500 MW with
+                      logarithmic normalization.
                   conf_class:
                     type: string
-                    description: "Detection confidence class. Values: 'nominal' | 'high'. Low-confidence detections are pre-filtered out. Use for point opacity or size (high = larger/more opaque)."
+                    description: >-
+                      Detection confidence class. Values: 'nominal' | 'high'. Low-confidence
+                      detections are pre-filtered out. Use for point opacity or size (high =
+                      larger/more opaque).
                     example: nominal
                   daynight:
                     type: string
-                    description: "Whether the detection was during day or night. Values: 'D' | 'N'. Use for icon variant."
+                    description: >-
+                      Whether the detection was during day or night. Values: 'D' | 'N'. Use for
+                      icon variant.
                     example: D
                   is_persistent:
                     type: boolean
-                    description: "True for hotspots at known persistent industrial or volcanic sources (oil flares, volcanoes, etc.). Use a distinct shape or color to differentiate from active wildfires."
+                    description: >-
+                      True for hotspots at known persistent industrial or volcanic sources (oil
+                      flares, volcanoes, etc.). Use a distinct shape or color to differentiate
+                      from active wildfires.
                   frp_comparable:
                     type: boolean
-                    description: "True when FRP ≥ 15 MW, the threshold where MODIS and VIIRS FRP values are comparable. Use to filter when comparing sensors."
+                    description: >-
+                      True when FRP ≥ 15 MW, the threshold where MODIS and VIIRS FRP values are
+                      comparable. Use to filter when comparing sensors.
                   bright_main:
                     type: number
-                    description: "Brightness temperature of the main channel (Kelvin). Secondary intensity signal; prefer frp for color ramps."
+                    description: >-
+                      Brightness temperature of the main channel (Kelvin). Secondary intensity
+                      signal; prefer frp for color ramps.
                   satellite:
                     type: string
-                    description: "Satellite identifier. VIIRS examples: 'N20' (NOAA-20), 'N21' (NOAA-21). MODIS examples: 'Terra', 'Aqua'."
+                    description: >-
+                      Satellite identifier. VIIRS examples: 'N20' (NOAA-20), 'N21' (NOAA-21).
+                      MODIS examples: 'Terra', 'Aqua'.
                     example: N20
                   sensor_group:
                     type: string

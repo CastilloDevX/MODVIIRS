@@ -21,6 +21,19 @@ def test_health(client):
     assert response.json == {"status": "ok"}
 
 
+def test_versioned_health_alias(client):
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    assert response.json == {"status": "ok"}
+
+
+def test_harmonized_data_unavailable_returns_explicit_service_error(client):
+    response = client.get("/api/v1/fires/calendar?lat_min=18&lat_max=19&lon_min=-91&lon_max=-90")
+    assert response.status_code == 503
+    assert response.json["error"] == "Data Unavailable"
+    assert "Git LFS" in response.json["message"]
+
+
 def test_missing_route_returns_json(client):
     response = client.get("/api/missing")
     assert response.status_code == 404

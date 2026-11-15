@@ -8,11 +8,14 @@ La versión global vive en [VERSION](VERSION). Seguir la [política de versionad
 
 - Añadidos endpoints Flask FIRMS para catálogo de fuentes, hotspots GeoJSON y resumen por fecha, con clave servidor, validación de filtros, división de periodos y errores externos sanitizados.
 - Añadidas pruebas simuladas para CSV MODIS/VIIRS, paginación temporal, validación, errores de proveedor y protección de credenciales.
+- Expuestas consultas de actividad armonizada por AOI; si faltan los Parquet o son punteros Git LFS, la API responde con un error 503 controlado.
+- Añadidos endpoints de pronóstico semanal con caché, consultas por semana y métricas de validación; sin caché vigente, responden con un error 503.
 
 ### Frontend
 
 - Selección de región (campo «Region» sobre «Imagery»): el botón Select oscurece el planeta; un clic/toque fija la primera esquina y otro la opuesta. Entre ambos, el rectángulo se ilumina y sigue al cursor; el resto queda oscuro. Mover el mapa con arrastre no cuenta como clic. Esc o Cancel cancelan; × borra la región. Guarda el cuadro como norte/sur/este/oeste (no cruza el antimeridiano); aún no muestra focos.
 - Selección de países (polígonos Natural Earth 1:50m, `frontend/public/data/countries.geojson`) queda aparcada tras `COUNTRY_SELECTION = false` en `countries.ts`.
+- Añadido un panel diagnóstico para elegir el pronóstico semanal y mostrar su capa GeoJSON sobre el mapa.
 
 ## 0.2.0 — 2026-11-14
 

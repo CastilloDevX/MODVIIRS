@@ -1,0 +1,409 @@
+{
+ "descripcion": "Validacion walk-forward (cada anio predicho con un modelo entrenado solo con anios anteriores). Anomalia = dias-con-fuego de la zona (0.5 deg) > max(p90 historico de su era, 3).",
+ "periodo_resumen": "era VIIRS 2015-2025",
+ "resumen_h1": {
+  "auc": 0.853,
+  "auc_base": 0.5879,
+  "ap": 0.2779,
+  "ap_base": 0.0749,
+  "brier": 0.0455,
+  "brier_base": 0.0686
+ },
+ "resumen_h1_sin_clima": {
+  "auc": 0.8411,
+  "auc_base": 0.5879,
+  "ap": 0.2434,
+  "ap_base": 0.0749,
+  "brier": 0.047,
+  "brier_base": 0.0686
+ },
+ "resumen_h2": {
+  "auc": 0.8142,
+  "auc_base": 0.5879,
+  "ap": 0.2084,
+  "ap_base": 0.0749,
+  "brier": 0.0485,
+  "brier_base": 0.0686
+ },
+ "wilcoxon_clima": {
+  "anios": 15,
+  "anios_mejor": 13,
+  "p_ap": 0.0004
+ },
+ "metricas_por_anio": [
+  {
+   "anio": 2008,
+   "era": "MODIS_Aqua",
+   "n": 3380,
+   "tasa_anom": 0.0178,
+   "prob_media": 0.0063,
+   "auc": 0.8923,
+   "auc_base": 0.5488,
+   "ap": 0.1338,
+   "ap_base": 0.0274,
+   "brier": 0.017,
+   "brier_base": 0.0238
+  },
+  {
+   "anio": 2009,
+   "era": "MODIS_Aqua",
+   "n": 3380,
+   "tasa_anom": 0.0346,
+   "prob_media": 0.0247,
+   "auc": 0.8789,
+   "auc_base": 0.5835,
+   "ap": 0.1475,
+   "ap_base": 0.0649,
+   "brier": 0.0321,
+   "brier_base": 0.0361
+  },
+  {
+   "anio": 2010,
+   "era": "MODIS_Aqua",
+   "n": 3380,
+   "tasa_anom": 0.0092,
+   "prob_media": 0.0116,
+   "auc": 0.8642,
+   "auc_base": 0.6105,
+   "ap": 0.0502,
+   "ap_base": 0.0283,
+   "brier": 0.0093,
+   "brier_base": 0.0139
+  },
+  {
+   "anio": 2011,
+   "era": "MODIS_Aqua",
+   "n": 3380,
+   "tasa_anom": 0.0328,
+   "prob_media": 0.0214,
+   "auc": 0.8935,
+   "auc_base": 0.6356,
+   "ap": 0.2224,
+   "ap_base": 0.0889,
+   "brier": 0.0287,
+   "brier_base": 0.0318
+  },
+  {
+   "anio": 2012,
+   "era": "MODIS_Aqua",
+   "n": 195,
+   "tasa_anom": 0.0051,
+   "prob_media": 0.0025,
+   "auc": 0.9536,
+   "auc_base": 0.4716,
+   "ap": 0.1,
+   "ap_base": 0.0051,
+   "brier": 0.005,
+   "brier_base": 0.0063
+  },
+  {
+   "anio": 2015,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0885,
+   "prob_media": 0.0398,
+   "auc": 0.8412,
+   "auc_base": 0.5,
+   "ap": 0.3076,
+   "ap_base": 0.0885,
+   "brier": 0.0744,
+   "brier_base": 0.0853
+  },
+  {
+   "anio": 2016,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0441,
+   "prob_media": 0.0369,
+   "auc": 0.8284,
+   "auc_base": 0.5555,
+   "ap": 0.172,
+   "ap_base": 0.0544,
+   "brier": 0.0399,
+   "brier_base": 0.1154
+  },
+  {
+   "anio": 2017,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0825,
+   "prob_media": 0.052,
+   "auc": 0.8916,
+   "auc_base": 0.5382,
+   "ap": 0.4501,
+   "ap_base": 0.0923,
+   "brier": 0.0598,
+   "brier_base": 0.1025
+  },
+  {
+   "anio": 2018,
+   "era": "VIIRS",
+   "n": 3445,
+   "tasa_anom": 0.043,
+   "prob_media": 0.0461,
+   "auc": 0.8096,
+   "auc_base": 0.5704,
+   "ap": 0.1955,
+   "ap_base": 0.0527,
+   "brier": 0.0385,
+   "brier_base": 0.0621
+  },
+  {
+   "anio": 2019,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.1038,
+   "prob_media": 0.1029,
+   "auc": 0.8535,
+   "auc_base": 0.6246,
+   "ap": 0.3571,
+   "ap_base": 0.1519,
+   "brier": 0.0786,
+   "brier_base": 0.098
+  },
+  {
+   "anio": 2020,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0438,
+   "prob_media": 0.0413,
+   "auc": 0.8871,
+   "auc_base": 0.6057,
+   "ap": 0.3629,
+   "ap_base": 0.068,
+   "brier": 0.0336,
+   "brier_base": 0.0541
+  },
+  {
+   "anio": 2021,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0269,
+   "prob_media": 0.0318,
+   "auc": 0.7864,
+   "auc_base": 0.5886,
+   "ap": 0.0898,
+   "ap_base": 0.0324,
+   "brier": 0.026,
+   "brier_base": 0.0396
+  },
+  {
+   "anio": 2022,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0263,
+   "prob_media": 0.0291,
+   "auc": 0.8117,
+   "auc_base": 0.5657,
+   "ap": 0.1087,
+   "ap_base": 0.0328,
+   "brier": 0.025,
+   "brier_base": 0.0361
+  },
+  {
+   "anio": 2023,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0686,
+   "prob_media": 0.0677,
+   "auc": 0.9035,
+   "auc_base": 0.6681,
+   "ap": 0.4728,
+   "ap_base": 0.1143,
+   "brier": 0.0475,
+   "brier_base": 0.065
+  },
+  {
+   "anio": 2024,
+   "era": "VIIRS",
+   "n": 3445,
+   "tasa_anom": 0.0627,
+   "prob_media": 0.0342,
+   "auc": 0.9046,
+   "auc_base": 0.6334,
+   "ap": 0.3847,
+   "ap_base": 0.0939,
+   "brier": 0.0492,
+   "brier_base": 0.0619
+  },
+  {
+   "anio": 2025,
+   "era": "VIIRS",
+   "n": 3380,
+   "tasa_anom": 0.0293,
+   "prob_media": 0.0452,
+   "auc": 0.865,
+   "auc_base": 0.6161,
+   "ap": 0.1559,
+   "ap_base": 0.0425,
+   "brier": 0.0279,
+   "brier_base": 0.0351
+  }
+ ],
+ "calibracion": [
+  {
+   "bin": "(-0.001, 0.05]",
+   "prob_media": 0.0095,
+   "observado": 0.016,
+   "n": 40896
+  },
+  {
+   "bin": "(0.05, 0.1]",
+   "prob_media": 0.0711,
+   "observado": 0.0953,
+   "n": 4616
+  },
+  {
+   "bin": "(0.1, 0.2]",
+   "prob_media": 0.1405,
+   "observado": 0.1747,
+   "n": 3086
+  },
+  {
+   "bin": "(0.2, 0.3]",
+   "prob_media": 0.2432,
+   "observado": 0.2491,
+   "n": 1136
+  },
+  {
+   "bin": "(0.3, 0.5]",
+   "prob_media": 0.3847,
+   "observado": 0.3398,
+   "n": 924
+  },
+  {
+   "bin": "(0.5, 0.7]",
+   "prob_media": 0.5828,
+   "observado": 0.5146,
+   "n": 309
+  },
+  {
+   "bin": "(0.7, 1.0]",
+   "prob_media": 0.7588,
+   "observado": 0.5517,
+   "n": 58
+  }
+ ],
+ "falsas_anomalias": [
+  {
+   "anio": 2002,
+   "mezclada": NaN,
+   "por_era": NaN
+  },
+  {
+   "anio": 2003,
+   "mezclada": NaN,
+   "por_era": NaN
+  },
+  {
+   "anio": 2004,
+   "mezclada": NaN,
+   "por_era": NaN
+  },
+  {
+   "anio": 2005,
+   "mezclada": 0.35,
+   "por_era": 0.35
+  },
+  {
+   "anio": 2006,
+   "mezclada": 1.3,
+   "por_era": 1.3
+  },
+  {
+   "anio": 2007,
+   "mezclada": 2.41,
+   "por_era": 2.41
+  },
+  {
+   "anio": 2008,
+   "mezclada": 1.78,
+   "por_era": 1.78
+  },
+  {
+   "anio": 2009,
+   "mezclada": 3.46,
+   "por_era": 3.46
+  },
+  {
+   "anio": 2010,
+   "mezclada": 0.92,
+   "por_era": 0.92
+  },
+  {
+   "anio": 2011,
+   "mezclada": 3.28,
+   "por_era": 3.28
+  },
+  {
+   "anio": 2012,
+   "mezclada": 11.58,
+   "por_era": NaN
+  },
+  {
+   "anio": 2013,
+   "mezclada": 18.11,
+   "por_era": NaN
+  },
+  {
+   "anio": 2014,
+   "mezclada": 8.49,
+   "por_era": NaN
+  },
+  {
+   "anio": 2015,
+   "mezclada": 16.39,
+   "por_era": 8.85
+  },
+  {
+   "anio": 2016,
+   "mezclada": 9.7,
+   "por_era": 4.41
+  },
+  {
+   "anio": 2017,
+   "mezclada": 12.49,
+   "por_era": 8.25
+  },
+  {
+   "anio": 2018,
+   "mezclada": 6.91,
+   "por_era": 4.3
+  },
+  {
+   "anio": 2019,
+   "mezclada": 16.72,
+   "por_era": 10.38
+  },
+  {
+   "anio": 2020,
+   "mezclada": 8.22,
+   "por_era": 4.38
+  },
+  {
+   "anio": 2021,
+   "mezclada": 4.14,
+   "por_era": 2.69
+  },
+  {
+   "anio": 2022,
+   "mezclada": 4.38,
+   "por_era": 2.63
+  },
+  {
+   "anio": 2023,
+   "mezclada": 10.06,
+   "por_era": 6.86
+  },
+  {
+   "anio": 2024,
+   "mezclada": 8.51,
+   "por_era": 6.27
+  },
+  {
+   "anio": 2025,
+   "mezclada": 4.53,
+   "por_era": 2.93
+  }
+ ]
+}

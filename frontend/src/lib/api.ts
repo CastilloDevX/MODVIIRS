@@ -5,12 +5,13 @@ export type HealthResponse = { status: 'ok' }
 export type ApiErrorKind = 'network' | 'http' | 'invalid-response' | 'cancelled'
 
 export class ApiError extends Error {
-  constructor(
-    readonly kind: ApiErrorKind,
-    message: string,
-    readonly statusCode?: number,
-  ) {
+  readonly kind: ApiErrorKind
+  readonly statusCode?: number
+
+  constructor(kind: ApiErrorKind, message: string, statusCode?: number) {
     super(message)
+    this.kind = kind
+    this.statusCode = statusCode
     this.name = 'ApiError'
   }
 }

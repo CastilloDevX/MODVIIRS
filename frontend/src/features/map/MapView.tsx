@@ -5,6 +5,41 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { COUNTRIES_URL, COUNTRY_SELECTION, EMPTY, dimmedWorld, type Country, type CountryFeature } from './countries'
 import { BASEMAPS, LANDSAT, OVERLAYS, gibsTiles } from './layers'
 import { bboxOf, dimOutside, outlineOf, type Bbox, type LngLat } from './region'
+import { LEVELS, PENINSULA, pct, type ZoneCollection, type ZoneProps } from './predictions'
+
+type GeoData = Parameters<maplibregl.GeoJSONSource['setData']>[0]
+
+/** Forecast layer: 0.5° zones coloured by the probability of anomalous hotspot activity. */
+function addPredictionLayers(map: maplibregl.Map) {
+  map.addSource('pred', { type: 'geojson', data: EMPTY as unknown as GeoData })
+  map.addLayer({
+    id: 'pred-fill', type: 'fill', source: 'pred',
+    paint: {
+      'fill-color': ['step', ['coalesce', ['get', 'prob'], 0], LEVELS[0].color, 0.1, LEVELS[1].color, 0.3, LEVELS[2].color, 0.5, LEVELS[3].color],
+      'fill-opacity': ['case', ['==', ['get', 'prob'], null], 0.05, 0.5],
+    },
+  })
+  map.addLayer({
+    id: 'pred-line', type: 'line', source: 'pred',
+    paint: {
+      'line-color': ['case', ['==', ['get', 'anomalia'], 1], '#ffffff', 'rgba(0,0,0,0.45)'],
+      'line-width': ['case', ['==', ['get', 'anomalia'], 1], 2.2, 0.6],
+    },
+  })
+  map.on('click', 'pred-fill', e => {
+    const p = e.features?.[0]?.properties as unknown as ZoneProps | undefined
+    if (!p) return
+    const anom = p.anomalia === null ? 'not observed yet' : p.anomalia === 1 ? 'YES' : 'no'
+    new maplibregl.Popup({ closeButton: true })
+      .setLngLat(e.lngLat)
+      .setHTML(`<div class="pred-popup"><b>Zone ${p.zona_id}</b><br/>Anomaly probability: <b>${pct(p.prob)}</b> (${p.nivel})`
+        + `<br/>Historical frequency: ${pct(p.base)}<br/>Fire-days: ${p.valor ?? '—'} · usual high (p90): ${p.p90 ?? '—'}`
+        + `<br/>Observed anomaly: ${anom}</div>`)
+      .addTo(map)
+  })
+  map.on('mouseenter', 'pred-fill', () => { map.getCanvas().style.cursor = 'pointer' })
+  map.on('mouseleave', 'pred-fill', () => { map.getCanvas().style.cursor = '' })
+}
 
 /** 3D = globe with atmosphere; 2D = flat Mercator map, north up, no tilt. */
 function applyMode(map: maplibregl.Map, mode: ViewMode) {
@@ -27,6 +62,9 @@ type Props = {
   selected: string | null; onSelect: (c: Country | null) => void
   picking: boolean; onPickingChange: (p: boolean) => void
   region: Bbox | null; onRegionChange: (r: Bbox | null) => void
+  prediction?: ZoneCollection | null
+  /** Increment to fly to the Yucatán Peninsula. */
+  focusPeninsula?: number
 }
 
 /** While picking the planet is dark; the box between the first corner and the pointer stays lit. */
@@ -44,13 +82,18 @@ function showSelection(map: maplibregl.Map, countries: CountryFeature[], id: str
   ;(map.getSource('outline') as maplibregl.GeoJSONSource | undefined)?.setData(country ?? EMPTY)
 }
 
-export function MapView({ basemap, mode, onModeChange, selected, onSelect, picking, onPickingChange, region, onRegionChange }: Props) {
+export function MapView({
+  basemap, mode, onModeChange, selected, onSelect, picking, onPickingChange, region, onRegionChange,
+  prediction = null, focusPeninsula = 0,
+}: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const countriesRef = useRef<CountryFeature[]>([])
   const cornerRef = useRef<LngLat | null>(null)
-  const current = useRef({ basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange })
-  useEffect(() => { current.current = { basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange } })
+  const current = useRef({ basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange, prediction })
+  useEffect(() => {
+    current.current = { basemap, mode, selected, onSelect, picking, onPickingChange, onRegionChange, prediction }
+  })
 
   useEffect(() => {
     const map = new maplibregl.Map({
@@ -84,6 +127,9 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
         map.addSource(o.id, { type: 'raster', tiles: gibsTiles(o.layer, o.level, 'png'), tileSize: 256, maxzoom: o.level })
         map.addLayer({ id: o.id, type: 'raster', source: o.id, paint: { 'raster-opacity': ['interpolate', ['linear'], ['zoom'], 8.5, 1, 10, 0] }, maxzoom: 10 })
       }
+      addPredictionLayers(map)
+      const p = current.current.prediction
+      if (p) (map.getSource('pred') as maplibregl.GeoJSONSource).setData(p as unknown as GeoData)
     })
     map.on('load', async () => {
       map.addSource('dim', { type: 'geojson', data: EMPTY })
@@ -170,6 +216,15 @@ export function MapView({ basemap, mode, onModeChange, selected, onSelect, picki
     const map = mapRef.current
     if (map?.isStyleLoaded()) applyMode(map, mode)
   }, [mode])
+
+  useEffect(() => {
+    const src = mapRef.current?.getSource('pred') as maplibregl.GeoJSONSource | undefined
+    src?.setData((prediction ?? EMPTY) as unknown as GeoData)
+  }, [prediction])
+
+  useEffect(() => {
+    if (focusPeninsula > 0) mapRef.current?.fitBounds(PENINSULA, { padding: 60, duration: 1600 })
+  }, [focusPeninsula])
 
   return (
     <div className="map-area">

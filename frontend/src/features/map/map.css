@@ -27,6 +27,15 @@
 .bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 5px; background: #fff; color: #111; font: 600 10px var(--font-body); padding: 1px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
 .day-labels { position: relative; height: 14px; margin: 5px 8px 0; font: 400 10px var(--font-body); color: #bbb; }
 .day-labels span { position: absolute; transform: translateX(-50%); }
+
+.pred-panel { border-top: 1px solid #2a2a2a; padding-top: 12px; }
+.pred-info { font: 400 11px var(--font-body); color: #ddd; display: flex; flex-direction: column; gap: 3px; }
+.pred-legend { display: flex; flex-wrap: wrap; gap: 6px 10px; font: 400 10px var(--font-body); color: #ccc; }
+.pred-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.pred-legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; opacity: .85; }
+.pred-legend i.pred-anom { background: transparent; border: 2px solid #fff; }
+.pred-muted { font: 400 10px var(--font-body); color: #8a8a8a; margin: 0; }
+.pred-popup { font: 400 12px var(--font-body); color: #111; line-height: 1.45; }
 @media (max-width: 900px) {
   .map-page { grid-template-columns: 1fr; grid-template-rows: auto 100dvh; height: auto; }
   .sidebar { overflow: visible; }
