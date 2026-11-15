@@ -5,6 +5,7 @@ Adaptado de harmonize_firms.py y aoi_queries.py (NASA2026/Data/armonizacion/).
 No importa harmonize_firms; todas las constantes y helpers están inlineadas aquí.
 La ruta a los parquet es relativa a este archivo (backend/data/).
 """
+
 import datetime as dt
 import math
 from pathlib import Path
@@ -61,27 +62,26 @@ def _build_derived(name: str, target: Path) -> None:
         part = target / f"{year}_{sensor}.parquet"
         if part.exists():
             continue
-        hot = (
-            src.filter(
-                (pl.col("year") == year)
-                & (pl.col("sensor_group") == sensor)
-                & ~pl.col("is_persistent")
-            )
-            .select(["cy", "cx", "acq_date_d", "year", "month", "sensor_group", "country", "frp"])
-        )
+        hot = src.filter(
+            (pl.col("year") == year) & (pl.col("sensor_group") == sensor) & ~pl.col("is_persistent")
+        ).select(["cy", "cx", "acq_date_d", "year", "month", "sensor_group", "country", "frp"])
         if name == "activity_daily.parquet":
             lf = hot.group_by(["cy", "cx", "acq_date_d", "sensor_group", "country"]).agg(
                 pl.len().alias("n_hotspots"), pl.col("frp").sum().alias("frp_sum")
             )
         else:
-            lf = hot.group_by(["cy", "cx", "year", "month", "sensor_group", "country"]).agg(
-                pl.len().alias("count"),
-                pl.col("acq_date_d").n_unique().alias("active_fire_days"),
-                pl.col("frp").sum().alias("frp_sum"),
-                pl.col("frp").mean().alias("frp_mean"),
-            ).with_columns(
-                ((pl.col("cy") + 0.5) * GRID_DEG).alias("cell_lat"),
-                ((pl.col("cx") + 0.5) * GRID_DEG).alias("cell_lon"),
+            lf = (
+                hot.group_by(["cy", "cx", "year", "month", "sensor_group", "country"])
+                .agg(
+                    pl.len().alias("count"),
+                    pl.col("acq_date_d").n_unique().alias("active_fire_days"),
+                    pl.col("frp").sum().alias("frp_sum"),
+                    pl.col("frp").mean().alias("frp_mean"),
+                )
+                .with_columns(
+                    ((pl.col("cy") + 0.5) * GRID_DEG).alias("cell_lat"),
+                    ((pl.col("cx") + 0.5) * GRID_DEG).alias("cell_lon"),
+                )
             )
         tmp = part.with_suffix(".tmp")
         _collect(lf).write_parquet(tmp)
@@ -101,6 +101,7 @@ def _activity_path(name: str):
 
 
 # --- helpers (de harmonize_firms.py) ---
+
 
 def _collect(lf):
     """Colecta LazyFrame en streaming; compatible con polars <2.0 y >=2.0."""
@@ -130,10 +131,12 @@ def _drop_gap_months(df):
 
 # --- consulta por AOI (de harmonize_firms.py) ---
 
+
 def aoi_cell_range(lat_min, lat_max, lon_min, lon_max):
     """Índices de celda del AOI con la misma fórmula que el pipeline (floor(valor/GRID_DEG)).
     int() truncaría hacia 0 y fallaría con coordenadas negativas (México, Brasil, Australia…)
     """
+
     def f(v):
         return int(math.floor(v / GRID_DEG))
 
@@ -154,16 +157,13 @@ def aoi_calendar(lat_min, lat_max, lon_min, lon_max, sensor_group, baseline=None
         .filter(pl.col("sensor_group") == sensor_group)
         .select(["year", "month", "cy", "cx", "active_fire_days"])
     )
-    present = (
-        _collect(gs.select(["year", "month"]).unique())
-        .with_columns(
-            pl.struct(["year", "month"])
-            .map_elements(
-                lambda r: (sensor_group, r["year"], r["month"]) not in EXCLUDE_YM,
-                return_dtype=pl.Boolean,
-            )
-            .alias("valid")
+    present = _collect(gs.select(["year", "month"]).unique()).with_columns(
+        pl.struct(["year", "month"])
+        .map_elements(
+            lambda r: (sensor_group, r["year"], r["month"]) not in EXCLUDE_YM,
+            return_dtype=pl.Boolean,
         )
+        .alias("valid")
     )
     sums = _collect(
         gs.filter(pl.col("cy").is_between(cyl, cyh) & pl.col("cx").is_between(cxl, cxh))
@@ -209,6 +209,7 @@ def aoi_calendar(lat_min, lat_max, lon_min, lon_max, sensor_group, baseline=None
 
 
 # --- consultas de aoi_queries.py (OUT → _DATA_DIR) ---
+
 
 def aoi_monthly_medians(lat_min, lat_max, lon_min, lon_max, sensor_group="VIIRS", baseline=None):
     """12 filas (una por mes del año) con la distribución histórica del AOI.
@@ -257,20 +258,23 @@ def aoi_daily(bbox_latlon, start, end, sensor_group="VIIRS"):
         .group_by("acq_date_d")
         .agg(pl.len().alias("cells_active"))
     )
-    tot = d.group_by("acq_date_d").agg(
-        [pl.col("n_hotspots").sum(), pl.col("frp_sum").sum()]
+    tot = d.group_by("acq_date_d").agg([pl.col("n_hotspots").sum(), pl.col("frp_sum").sum()])
+    return _collect(cells.join(tot, on="acq_date_d").sort("acq_date_d")).rename(
+        {"acq_date_d": "date"}
     )
-    return _collect(
-        cells.join(tot, on="acq_date_d").sort("acq_date_d")
-    ).rename({"acq_date_d": "date"})
 
 
 def _valid_years(sensor_group, month, lo, hi):
-    g = pl.scan_parquet(_activity_path("activity_grid.parquet")).filter(
-        (pl.col("sensor_group") == sensor_group)
-        & (pl.col("month") == month)
-        & pl.col("year").is_between(lo, hi)
-    ).select("year").unique()
+    g = (
+        pl.scan_parquet(_activity_path("activity_grid.parquet"))
+        .filter(
+            (pl.col("sensor_group") == sensor_group)
+            & (pl.col("month") == month)
+            & pl.col("year").is_between(lo, hi)
+        )
+        .select("year")
+        .unique()
+    )
     ys = sorted(_collect(g)["year"].to_list())
     return [y for y in ys if (sensor_group, y, month) not in EXCLUDE_YM]
 
@@ -367,8 +371,10 @@ def normalize_nrt(raw: pl.DataFrame) -> pl.DataFrame:
         return raw
     c = pl.col("confidence").cast(pl.Utf8).str.to_lowercase()
     conf = (
-        pl.when(c == "h").then(pl.lit("high"))
-        .when(c == "n").then(pl.lit("nominal"))
+        pl.when(c == "h")
+        .then(pl.lit("high"))
+        .when(c == "n")
+        .then(pl.lit("nominal"))
         .otherwise(pl.lit("low"))
     )
     lat = pl.col("latitude").cast(pl.Float64)
@@ -377,8 +383,10 @@ def normalize_nrt(raw: pl.DataFrame) -> pl.DataFrame:
         raw.unique(subset=["latitude", "longitude", "acq_date", "acq_time", "satellite"])
         .with_columns(
             [
-                pl.col("acq_date").cast(pl.Utf8)
-                .str.strptime(pl.Date, strict=False).alias("acq_date_d"),
+                pl.col("acq_date")
+                .cast(pl.Utf8)
+                .str.strptime(pl.Date, strict=False)
+                .alias("acq_date_d"),
                 conf.alias("conf_class"),
                 lat.alias("latitude"),
                 lon.alias("longitude"),
@@ -400,22 +408,33 @@ def normalize_nrt(raw: pl.DataFrame) -> pl.DataFrame:
     mask = pl.read_parquet(_DATA_DIR / "persistent_mask.parquet").select(
         ["py", "px", "is_persistent"]
     )
-    df = (
-        df.join(mask, on=["py", "px"], how="left")
-        .with_columns(
-            [
-                pl.col("is_persistent").fill_null(False),
-                (pl.col("frp") >= FRP_COMPARABLE_MW).alias("frp_comparable"),
-                pl.col("acq_date_d").dt.year().alias("year"),
-                pl.col("acq_date_d").dt.month().cast(pl.Int8).alias("month"),
-            ]
-        )
+    df = df.join(mask, on=["py", "px"], how="left").with_columns(
+        [
+            pl.col("is_persistent").fill_null(False),
+            (pl.col("frp") >= FRP_COMPARABLE_MW).alias("frp_comparable"),
+            pl.col("acq_date_d").dt.year().alias("year"),
+            pl.col("acq_date_d").dt.month().cast(pl.Int8).alias("month"),
+        ]
     )
     return df.select(
         [
-            "latitude", "longitude", "acq_date_d", "year", "month", "sensor_group",
-            "satellite", "res_m", "conf_class", "frp", "daynight", "bright_main", "version",
-            "is_persistent", "frp_comparable", "cy", "cx",
+            "latitude",
+            "longitude",
+            "acq_date_d",
+            "year",
+            "month",
+            "sensor_group",
+            "satellite",
+            "res_m",
+            "conf_class",
+            "frp",
+            "daynight",
+            "bright_main",
+            "version",
+            "is_persistent",
+            "frp_comparable",
+            "cy",
+            "cx",
         ]
     )
 
@@ -429,7 +448,7 @@ def nrt_request_plan(bbox, start, end, sources=None, max_days=API_MAX_DAYS):
     plan, cur = [], start
     while cur <= end:
         span = min(max_days, (end - cur).days + 1)
-        for src in (sources or SOURCES_VIIRS_NRT):
+        for src in sources or SOURCES_VIIRS_NRT:
             plan.append(
                 {
                     "source": src,
@@ -508,7 +527,13 @@ def aoi_points_all(
 ):
     """Igual que aoi_points pero sin límite de filas — para exportación CSV."""
     df, _ = aoi_points(
-        bbox_latlon, start, end, sensor_group, satellite,
-        frp_comparable, exclude_persistent, limit=10_000_000,
+        bbox_latlon,
+        start,
+        end,
+        sensor_group,
+        satellite,
+        frp_comparable,
+        exclude_persistent,
+        limit=10_000_000,
     )
     return df

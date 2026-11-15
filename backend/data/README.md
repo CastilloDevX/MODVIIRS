@@ -50,9 +50,16 @@ Dependencias: `pip install -r ../requirements.txt` (el pipeline solo usa polars 
 ## Uso desde el backend
 
 ```python
-import sys; sys.path.insert(0, "Data/armonizacion")      # o instalar/copiar el módulo
+import sys
+
+sys.path.insert(0, "Data/armonizacion")  # o instalar/copiar el módulo
 import aoi_queries as Q
-Q.aoi_calendar(19.0, 20.0, -100.0, -99.0, "VIIRS")        # year, month, afd, valid, mean, std, p50, n_base, z, pctl
-Q.aoi_monthly_medians(19.0, 20.0, -100.0, -99.0)          # 12 filas: month, median, p25, p75, mean, std, min, max, n_years, baseline_corto
+
+Q.aoi_calendar(
+    19.0, 20.0, -100.0, -99.0, "VIIRS"
+)  # year, month, afd, valid, mean, std, p50, n_base, z, pctl
+Q.aoi_monthly_medians(
+    19.0, 20.0, -100.0, -99.0
+)  # 12 filas: month, median, p25, p75, mean, std, min, max, n_years, baseline_corto
 ```
 `/calendar` y `/medians` solo necesitan `activity_grid.parquet`. Funciones, endpoints y plan de implementación: `docs/IMPLEMENTACION_API.md`; tablas y casos de uso: `docs/GUIA_DATASETS.md`.

@@ -30,6 +30,12 @@ testpaths = ["tests"]
 [tool.ruff]
 target-version = "py312"
 line-length = 100
+# Reference copies of the data pipeline (notebooks and one-off scripts), not part of the package.
+extend-exclude = ["pipeline"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# The Swagger docstrings are long YAML descriptions.
+"src/modviirs/api/*.py" = ["E501"]

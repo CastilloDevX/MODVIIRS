@@ -45,9 +45,7 @@ def _parse_point_filters():
     if "frp_comparable" in request.args:
         filters["frp_comparable"] = request.args["frp_comparable"].lower() == "true"
     if "exclude_persistent" in request.args:
-        filters["exclude_persistent"] = (
-            request.args["exclude_persistent"].lower() == "true"
-        )
+        filters["exclude_persistent"] = request.args["exclude_persistent"].lower() == "true"
     return filters
 
 
@@ -539,6 +537,7 @@ def get_points_csv():
         return jsonify(error="start and end are required as YYYY-MM-DD"), 400
     filters = _parse_point_filters()
     bbox = (lat_min, lat_max, lon_min, lon_max)
+
     # The sensor family column (MODIS/VIIRS) is dropped from the export. The CSV is streamed
     # month by month: a wide area over many years can be several GB, too big to hold in memory
     # or to write to a temporary file.
